@@ -10,10 +10,13 @@ async function bootstrap() {
     .setTitle(name)
     .setDescription(description)
     .setVersion(version)
+    .addTag('blogs')
+    .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3001);
+  console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();
