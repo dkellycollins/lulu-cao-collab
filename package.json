@@ -1,7 +1,7 @@
 {
   "name": "devin-lulu-collab",
   "version": "0.0.1",
-  "description": "Blog for 2025",
+  "description": "Blog and RSS Reader",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
@@ -25,7 +25,6 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/swagger": "^7.4.2",
     "@nestjs/typeorm": "^10.0.2",
-    "class-validator": "0.14.1",
     "pg": "^8.13.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",

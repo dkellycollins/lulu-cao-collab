@@ -13,6 +13,8 @@ async function bootstrap() {
     .addTag('blogs')
     .addBearerAuth()
     .build();
+
+  // Enable Swagger
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
 
