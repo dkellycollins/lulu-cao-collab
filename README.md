@@ -1,6 +1,10 @@
+# VibeReads
+
+A Blog and RSS Reader website.
+
 ## Description
 
-Blog and RSS Reader backend built with [Nest](https://github.com/nestjs/nest). 
+Backend built with [Nest](https://github.com/nestjs/nest). 
 
 See frontend at https://github.com/lulu-cao/blog. 
 
@@ -8,7 +12,7 @@ See the original backend at https://github.com/lulu-cao/blog-cms-django.
 
 See DB design at [Miro](https://miro.com/welcome/TnU0UnNuR2RoZjBIY2paYXFhTFYvTWRkREVrYldGdURJUGVYYnJtL2V0V1JSRVNUK3pLSUxJdm5tbXpwUG5MOWtzRDUwQW40eGJ6YS9KRTVqYnpUekw4S3UvK0J2Umo0OFRjNTJoZjNnWTVMMjhCb0pGZ2Fua3hZaUVKTEdSbEYhZQ==?share_link_id=928703731217).
 
-See API design at http://localhost:3001/api after running the app. 
+See API design at http://localhost:3001/api when running the app. 
 
 ## Project setup
 

@@ -7,11 +7,11 @@ import { UpdateBlogDto } from './dto/update-blog.dto';
 
 @ApiBearerAuth()
 @ApiTags('blogs')
-@Controller('blogs')
+@Controller('blogs') // Naming a nesting route called `/blogs`
 export class BlogsController {
   constructor(private readonly blogsService: BlogsService) {}
 
-  @ApiOperation({ summary: "@ApiOperation({ summary: 'Get all blog posts' })" })
+  @ApiOperation({ summary: "Get all blog posts" })
   @Get()
   findAll(): Promise<Blog[]> {
     return this.blogsService.findAll();
@@ -24,13 +24,13 @@ export class BlogsController {
     return this.blogsService.findOne(+id);
   }
 
-  @ApiOperation({ summary: 'Create a new blog post using createBlogDto' })
+  @ApiOperation({ summary: 'Create a new blog post' })
   @Post()
   create(@Body() createBlogDto: CreateBlogDto): Promise<Blog> {
     return this.blogsService.create(createBlogDto.title, createBlogDto.content);
   }
 
-  @ApiOperation({ summary: 'Update a blog post by ID using UpdateBlogDto' })
+  @ApiOperation({ summary: 'Update a blog post by ID' })
   @ApiParam({ name: 'id', description: 'The ID of the blog post' })
   @Put(':id')
   update(

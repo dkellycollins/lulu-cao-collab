@@ -10,7 +10,6 @@ async function bootstrap() {
     .setTitle(name)
     .setDescription(description)
     .setVersion(version)
-    .addTag('blogs')
     .addBearerAuth()
     .build();
 
