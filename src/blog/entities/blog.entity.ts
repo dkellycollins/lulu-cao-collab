@@ -15,10 +15,6 @@ export class Blog {
    */
   title: string;
 
-  @ApiProperty({ example: "Blululu", description: 'Creator or editor' })
-  @Column()
-  author: string;
-
   @ApiProperty({
     example: 'There is a star in the summer',
     description: 'Content of the blog',
@@ -26,7 +22,19 @@ export class Blog {
   @Column()
   content: string;
 
+  @ApiProperty({ description: 'Cover image for the blog' })
+  @Column()
+  blogImage: string;
+
   @ApiProperty({ description: 'Creation date of the blog' })
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
+
+  @ApiProperty({ description: 'Update date of the blog' })
+  @Column({ default: () => 'CURRENT_TIMESTAMP' })
+  updatedAt: Date;
+
+  @ApiProperty({ example: "Blululu", description: 'Creator or editor' })
+  @Column()
+  user: string;
 }

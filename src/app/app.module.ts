@@ -8,6 +8,7 @@ import { BookModule } from 'src/book/book.module';
 import { Book } from 'src/book/entities/book.entity';
 import { User } from 'src/user/entities/user.entity';
 import { UserModule } from 'src/user/user.module';
+import { ReviewModule } from 'src/review/review.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { UserModule } from 'src/user/user.module';
     UserModule,
     BlogsModule,
     BookModule,
+    ReviewModule              
   ],
   controllers: [AppController],
   providers: [AppService],

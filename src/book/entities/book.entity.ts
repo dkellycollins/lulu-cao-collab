@@ -19,7 +19,11 @@ export class Book {
   @Column()
   category: string;
 
-  @ApiProperty({ description: 'Publication date' })
+  @ApiProperty({ description: 'Publication year' })
   @Column()
-  publicationDate: Date;
+  publicationYear: number;
+
+  @ApiProperty({ description: 'Cover image for the book' })
+  @Column()
+  image: string;
 }
