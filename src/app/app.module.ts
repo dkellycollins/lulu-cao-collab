@@ -9,19 +9,22 @@ import { Book } from 'src/book/entities/book.entity';
 import { User } from 'src/user/entities/user.entity';
 import { UserModule } from 'src/user/user.module';
 import { ReviewModule } from 'src/review/review.module';
+import { File } from 'src/file/entities/file.entity';
+import { FileModule } from 'src/file/file.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({ // Integrate with database
       type: 'sqlite',
       database: 'db',
-      entities: [Blog, Book, User],
+      entities: [Blog, Book, User, File],
       synchronize: true,
     }),
     UserModule,
     BlogsModule,
     BookModule,
-    ReviewModule              
+    ReviewModule,
+    FileModule,              
   ],
   controllers: [AppController],
   providers: [AppService],

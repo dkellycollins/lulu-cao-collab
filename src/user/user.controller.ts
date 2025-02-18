@@ -1,6 +1,9 @@
-import { Controller, Get, Param, Post, Put, Delete } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, Get, Param, Post, Put, Delete, Body } from '@nestjs/common';
+import { ApiTags, ApiParam, ApiBearerAuth, ApiCreatedResponse, ApiForbiddenResponse, ApiFoundResponse, ApiNotFoundResponse, ApiOkResponse } from '@nestjs/swagger';
 import { UserService } from './user.service'
+import { CreateUserDto } from './dto/create-user.dto';
+import { User } from './entities/user.entity';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @ApiBearerAuth()
 @ApiTags('users')
@@ -8,29 +11,42 @@ import { UserService } from './user.service'
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @ApiOperation({ summary: 'Get a user by ID' })
-  @ApiParam({ name: 'id', description: 'The ID of the user' })
+  /**
+   * Get a user by Id
+   */
   @Get(':id')
+  @ApiParam({ name: 'id', description: 'The ID of the user', type: User })
+  @ApiFoundResponse({ description: 'User found' })
+  @ApiNotFoundResponse({ description: 'User not found' })
   getUser(@Param('id') id: string): string {
     return this.userService.getUser(id)
   }
 
-  @ApiOperation({ summary: 'Create a new user' })
+  /**
+   * Create a new user
+   */
   @Post()
-  create(): Promise<void> {
+  @ApiCreatedResponse({ description: 'User created', type: User })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  create(@Body() createUserDto: CreateUserDto): Promise<void> {
     return
   }
 
-  @ApiOperation({ summary: 'Update a user' })
-  @ApiParam({ name: 'id', description: 'The ID of the user' })
+  /**
+   * Update a user by Id
+   */
   @Put(':id')
-  update(): Promise<void> {
+  @ApiParam({ name: 'id', description: 'The ID of the user', type: User })
+  update(@Body() updateUserDto: UpdateUserDto): Promise<void> {
     return
   }
 
-  @ApiOperation({ summary: 'Delete a user' })
-  @ApiParam({ name: 'id', description: 'The ID of the user' })
+  /**
+   * Delete a user by Id
+   */
   @Delete(':id')
+  @ApiParam({ name: 'id', description: 'The ID of the user' })
+  @ApiOkResponse({ description: 'User deleted' })
   delete(): Promise<void> {
     return
   }
