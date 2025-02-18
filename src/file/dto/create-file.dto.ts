@@ -15,4 +15,6 @@ export class CreateFileDto {
   contentSize: string;
 
   user?: string;
+
+  blog?: string;
 }

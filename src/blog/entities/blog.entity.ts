@@ -1,40 +1,35 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm'
-import { ApiProperty } from '@nestjs/swagger';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne, JoinColumn } from 'typeorm'
+import { User } from 'src/user/entities/user.entity';
+import { File } from 'src/file/entities/file.entity';
 
 @Entity()
 export class Blog {
-  @ApiProperty({ description: 'Blog ID' })
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ApiProperty({ description: 'Blog Title' })
-  @Column()
   /**
    * The title of the blog
    * @example Summer Star
    */
+  @Column()
   title: string;
 
-  @ApiProperty({
-    example: 'There is a star in the summer',
-    description: 'Content of the blog',
-  })
+  /**
+   * @example There is a star in the summer
+   */
   @Column()
-  content: string;
+  content?: string;
 
-  @ApiProperty({ description: 'Cover image for the blog' })
-  @Column()
-  blogImage: string;
-
-  @ApiProperty({ description: 'Creation date of the blog' })
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @ApiProperty({ description: 'Update date of the blog' })
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 
-  @ApiProperty({ example: "Blululu", description: 'Creator or editor' })
-  @Column()
-  user: string;
+  @OneToOne(type => File, file => file.blog)
+  @JoinColumn()
+  image?: File;
+
+  @ManyToOne(type => User, user => user.blog)
+  user: User;
 }

@@ -1,5 +1,5 @@
-import { Controller, Get, Param, Post, Put, Delete, Body } from '@nestjs/common';
-import { ApiTags, ApiParam, ApiBearerAuth, ApiCreatedResponse, ApiForbiddenResponse, ApiFoundResponse, ApiNotFoundResponse, ApiOkResponse } from '@nestjs/swagger';
+import { Controller, Get, Param, Post, Put, Delete, Body, Query } from '@nestjs/common';
+import { ApiTags, ApiParam, ApiBearerAuth, ApiCreatedResponse, ApiForbiddenResponse, ApiFoundResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { UserService } from './user.service'
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
@@ -21,6 +21,15 @@ export class UserController {
   getUser(@Param('id') id: string): string {
     return this.userService.getUser(id)
   }
+
+  /**
+   * Query a user by username
+   */
+  @Get()
+  @ApiQuery({ name: 'username' })
+  @ApiFoundResponse({ description: 'User found', type: User })
+  @ApiNotFoundResponse({ description: 'User not found' })
+  getUserByUsername(@Query('username') username: string) {}
 
   /**
    * Create a new user

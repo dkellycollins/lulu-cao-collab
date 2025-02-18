@@ -1,17 +1,25 @@
+import { File } from "src/file/entities/file.entity";
+import { User } from "src/user/entities/user.entity";
+
 export class CreateBlogDto {
+  id: number;
+
   /** 
   * Title of the blog
   */
-  readonly title: string;
-
-  /**
-  * Author of the blog
-  */
-  readonly author: string;
+  title: string;
 
   /**
   * Content of the blog
   */
-  readonly content: string;
+  content?: string;
+
+  createdAt: Date;
+
+  updatedAt: Date;
+
+  image?: File;
+
+  user: User;
 }
 

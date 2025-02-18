@@ -1,26 +1,29 @@
 import { Controller, Get, Delete, Post } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
 import { AppService } from './app.service';
+import { ApiOkResponse } from '@nestjs/swagger';
+import { Blog } from 'src/blog/entities/blog.entity';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @ApiOperation({ summary: 'Get featured blogs' })
+  /**
+   * Get featured blogs
+   * @returns 
+   */
   @Get()
+  @ApiOkResponse({ type: [Blog] })
   getFeaturedBlogs(): string {
     return this.appService.getFeaturedBlogs();
   }
 
-  @ApiOperation({ summary: 'Sign up or log in'})
-  @Post()
-  login(): Promise<void> {
-    return
-  }
+  // @Post()
+  // login(): Promise<void> {
+  //   return
+  // }
 
-  @ApiOperation({ summary: 'Log out' })
-  @Delete()
-  logout(): Promise<void> {
-    return
-  }
+  // @Delete()
+  // logout(): Promise<void> {
+  //   return
+  // }
 }

@@ -1,3 +1,4 @@
+import { Blog } from "src/blog/entities/blog.entity";
 import { User } from "src/user/entities/user.entity";
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
@@ -23,4 +24,7 @@ export class File {
 
   @OneToOne(type => User, user => user.profilePicture)
   user?: User;
+
+  @OneToOne(type => Blog, blog => blog.image)
+  blog?: Blog
 }
