@@ -12,14 +12,13 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   /**
-   * Get a user by Id
+   * Get a user by id
    */
   @Get(':id')
-  @ApiParam({ name: 'id', description: 'The ID of the user', type: User })
   @ApiFoundResponse({ description: 'User found' })
   @ApiNotFoundResponse({ description: 'User not found' })
-  getUser(@Param('id') id: string): string {
-    return this.userService.getUser(id)
+  findOne(@Param('id') id: number): Promise<User> {
+    return this.userService.findOneById(+id)
   }
 
   /**
@@ -27,9 +26,11 @@ export class UserController {
    */
   @Get()
   @ApiQuery({ name: 'username' })
-  @ApiFoundResponse({ description: 'User found', type: User })
+  @ApiFoundResponse({ description: 'User found'})
   @ApiNotFoundResponse({ description: 'User not found' })
-  getUserByUsername(@Query('username') username: string) {}
+  findOneByUsername(@Query('username') username: string): Promise<User> {
+    return this.userService.findOneByUsername(username)
+  }
 
   /**
    * Create a new user
@@ -37,26 +38,32 @@ export class UserController {
   @Post()
   @ApiCreatedResponse({ description: 'User created', type: User })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  create(@Body() createUserDto: CreateUserDto): Promise<void> {
-    return
+  create(@Body() createUserDto: CreateUserDto): Promise<User> {
+    return this.userService.create(createUserDto.username, createUserDto.email)
   }
 
   /**
-   * Update a user by Id
+   * Update a user by id
    */
   @Put(':id')
-  @ApiParam({ name: 'id', description: 'The ID of the user', type: User })
-  update(@Body() updateUserDto: UpdateUserDto): Promise<void> {
-    return
+  @ApiOkResponse({ description: 'User updated', type: User })
+  @ApiNotFoundResponse({ description: 'User not found' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto
+  ): Promise<User> {
+    return this.userService.update(+id, updateUserDto.username, updateUserDto.email)
   }
 
   /**
-   * Delete a user by Id
+   * Delete a user by id
    */
   @Delete(':id')
-  @ApiParam({ name: 'id', description: 'The ID of the user' })
   @ApiOkResponse({ description: 'User deleted' })
-  delete(): Promise<void> {
-    return
+  @ApiNotFoundResponse({ description: 'User not found' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  delete(@Param('id') id: number): Promise<void> {
+    return this.userService.delete(id)
   }
 }

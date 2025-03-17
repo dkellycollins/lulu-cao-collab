@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Param, Body, Put, Delete } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags, ApiOperation, ApiParam, ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
-import { BlogsService } from './blog.service';
+import { ApiBearerAuth, ApiTags, ApiOperation, ApiParam, ApiOkResponse, ApiCreatedResponse, ApiFoundResponse, ApiNotFoundResponse, ApiForbiddenResponse } from '@nestjs/swagger';
+import { BlogService } from './blog.service';
 import { Blog } from './entities/blog.entity'
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
@@ -9,7 +9,7 @@ import { UpdateBlogDto } from './dto/update-blog.dto';
 @ApiTags('blogs') // Naming a nesting route called `/blogs`
 @Controller('blogs') 
 export class BlogsController {
-  constructor(private readonly blogsService: BlogsService) {}
+  constructor(private readonly blogService: BlogService) {}
 
   /**
    * Get all blog posts
@@ -17,17 +17,18 @@ export class BlogsController {
   @Get()
   @ApiOkResponse({ description: 'Blogs found', type: [Blog] })
   findAll(): Promise<Blog[]> {
-    return this.blogsService.findAll();
+    return this.blogService.findAll();
   }
 
   /**
    * Get a blog post by id
    */
   @Get(':id')
-  @ApiParam({ name: 'id' })
-  @ApiOkResponse({ description: 'Blog found', type: Blog })
+  @ApiParam({ name: 'id', type: Blog })
+  @ApiFoundResponse({ description: 'Blog found' })
+  @ApiNotFoundResponse({ description: 'Blog not found' })
   findOne(@Param('id') id: string): Promise<Blog> {
-    return this.blogsService.findOne(+id);
+    return this.blogService.findOne(+id);
   }
 
   /**
@@ -35,34 +36,31 @@ export class BlogsController {
    */
   @Post()
   @ApiCreatedResponse({ description: 'Blog created', type: Blog })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
   create(@Body() createBlogDto: CreateBlogDto): Promise<Blog> {
-    return this.blogsService.create(createBlogDto.title, createBlogDto.content);
+    return this.blogService.create(createBlogDto.title, createBlogDto.content);
   }
 
   /**
    * Update a blog post by id
-   * @param id 
-   * @returns  
    */
   @Put(':id')
   @ApiParam({ name: 'id' })
   @ApiOkResponse({ description: 'Blog updated', type: Blog })
   update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateBlogDto: UpdateBlogDto,
   ): Promise<Blog> {
-    return this.blogsService.update(+id, updateBlogDto.title, updateBlogDto.content);
+    return this.blogService.update(id, updateBlogDto.title, updateBlogDto.content);
   }
 
   /**
    * Delete a blog post by id
-   * @param id 
-   * @returns 
    */
   @Delete(':id')
   @ApiParam({ name: 'id' })
   @ApiOkResponse({ description: 'Blog deleted' })
   delete(@Param('id') id: string): Promise<void> {
-    return this.blogsService.delete(+id);
+    return this.blogService.delete(+id);
   }
 }

@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Blog } from './entities/blog.entity';
 
 @Injectable()
-export class BlogsService {
+export class BlogService {
   constructor(
     @InjectRepository(Blog) // Inject the BlogRepository
     private blogRepository: Repository<Blog>,
@@ -23,12 +23,13 @@ export class BlogsService {
     return this.blogRepository.save(blog);
   }
 
-  async update(id: number, title: string, content: string): Promise<Blog> {
+  async update(id: number, title?: string, content?: string): Promise<Blog> {
     const blog = await this.blogRepository.findOneBy({ id });
     if (!blog) throw new NotFoundException(`Blog with ID ${id} not found`);
 
-    blog.title = title;
-    blog.content = content;
+    if (title) blog.title = title;
+    if (content) blog.content = content;
+
     return this.blogRepository.save(blog);
   }
 
