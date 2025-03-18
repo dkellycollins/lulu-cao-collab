@@ -26,7 +26,7 @@ export class Blog {
   updatedAt: Date;
 
   @OneToMany(() => File, file => file.blog)
-  images: File[];
+  images?: File[];
 
   @ManyToOne(() => User, user => user.blogs)
   @JoinColumn({ name: "author_id" })

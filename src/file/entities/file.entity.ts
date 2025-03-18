@@ -24,9 +24,9 @@ export class File {
 
   @ManyToOne(()=>User, user => user.profilePictures)
   @JoinColumn({ name: "user_id" })
-  user: User;
+  user?: User;
 
   @ManyToOne(()=>Blog, blog => blog.images)
   @JoinColumn({ name: "blog_id" })
-  blog: Blog;
+  blog?: Blog;
 }
