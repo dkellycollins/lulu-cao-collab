@@ -19,7 +19,6 @@ import { FileModule } from 'src/file/file.module';
       type: 'sqlite',
       database: 'db',
       entities: [Blog, User, File],
-      synchronize: true,
     }),
     UserModule,
     BlogModule,

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { File } from './entities/file.entity';
@@ -19,7 +19,12 @@ export class FileService {
     filename: string,
     contentType: string,
     contentSize: string,
+    userId?: string,
+    blogId?: string
   ): Promise<File> {
+    if (!userId && !blogId) {
+      throw new BadRequestException ("user or blog required")
+    }
     const file = this.fileRepository.create({ providerKey, filename, contentType, contentSize });
     return this.fileRepository.save(file);
   }
