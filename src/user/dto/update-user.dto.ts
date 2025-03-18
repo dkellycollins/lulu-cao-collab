@@ -10,7 +10,7 @@ export class UpdateUserDto {
   @IsEmail()
   email?: string;
 
-  profilePicture?: File;
+  profilePictures?: File[];
 
   blogs?: Blog[];
 }

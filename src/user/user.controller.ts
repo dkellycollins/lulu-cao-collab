@@ -39,7 +39,7 @@ export class UserController {
   @ApiCreatedResponse({ description: 'User created', type: User })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.userService.create(createUserDto.username, createUserDto.email)
+    return this.userService.create(createUserDto)
   }
 
   /**
@@ -50,10 +50,10 @@ export class UserController {
   @ApiNotFoundResponse({ description: 'User not found' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateUserDto: UpdateUserDto
   ): Promise<User> {
-    return this.userService.update(+id, updateUserDto.username, updateUserDto.email)
+    return this.userService.update(id, updateUserDto)
   }
 
   /**

@@ -1,12 +1,17 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BlogService } from './blog.service';
-import { BlogsController } from './blog.controller';
+import { BlogController } from './blog.controller';
 import { Blog } from './entities/blog.entity';
+import { FileModule } from 'src/file/file.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Blog])], // Register the Blog repository for the Blog entity
+  imports: [
+    TypeOrmModule.forFeature([Blog]), // Ensure Blog repository is provided
+    FileModule // Import FileModule to get FileRepository
+  ], 
+  controllers: [BlogController],
   providers: [BlogService],
-  controllers: [BlogsController],
+  exports: [TypeOrmModule.forFeature([Blog])], // Export so other modules can use it
 })
-export class BlogsModule {}
+export class BlogModule {}

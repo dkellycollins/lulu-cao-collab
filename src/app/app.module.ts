@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BlogsModule } from 'src/blog/blog.module';
+import { BlogModule } from 'src/blog/blog.module';
 import { Blog } from 'src/blog/entities/blog.entity';
 // import { BookModule } from 'src/book/book.module';
 // import { Book } from 'src/book/entities/book.entity';
@@ -22,7 +22,7 @@ import { FileModule } from 'src/file/file.module';
       synchronize: true,
     }),
     UserModule,
-    BlogsModule,
+    BlogModule,
     FileModule,              
   ],
   controllers: [AppController],

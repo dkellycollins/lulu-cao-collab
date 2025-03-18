@@ -8,14 +8,15 @@ import { UpdateBlogDto } from './dto/update-blog.dto';
 @ApiBearerAuth()
 @ApiTags('blogs') // Naming a nesting route called `/blogs`
 @Controller('blogs') 
-export class BlogsController {
+export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
   /**
    * Get all blog posts
    */
   @Get()
-  @ApiOkResponse({ description: 'Blogs found', type: [Blog] })
+  @ApiFoundResponse({ description: 'Blogs found', type: [Blog] })
+  @ApiNotFoundResponse({ description: 'No blog found' })
   findAll(): Promise<Blog[]> {
     return this.blogService.findAll();
   }
@@ -24,11 +25,10 @@ export class BlogsController {
    * Get a blog post by id
    */
   @Get(':id')
-  @ApiParam({ name: 'id', type: Blog })
   @ApiFoundResponse({ description: 'Blog found' })
   @ApiNotFoundResponse({ description: 'Blog not found' })
-  findOne(@Param('id') id: string): Promise<Blog> {
-    return this.blogService.findOne(+id);
+  findOne(@Param('id') id: number): Promise<Blog> {
+    return this.blogService.findOne(id);
   }
 
   /**
@@ -38,29 +38,36 @@ export class BlogsController {
   @ApiCreatedResponse({ description: 'Blog created', type: Blog })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   create(@Body() createBlogDto: CreateBlogDto): Promise<Blog> {
-    return this.blogService.create(createBlogDto.title, createBlogDto.content);
+    return this.blogService.create(
+      createBlogDto.title, 
+      createBlogDto.content
+    );
   }
 
   /**
    * Update a blog post by id
    */
   @Put(':id')
-  @ApiParam({ name: 'id' })
   @ApiOkResponse({ description: 'Blog updated', type: Blog })
+  @ApiNotFoundResponse({ description: 'Blog not found' })
   update(
     @Param('id') id: number,
     @Body() updateBlogDto: UpdateBlogDto,
   ): Promise<Blog> {
-    return this.blogService.update(id, updateBlogDto.title, updateBlogDto.content);
+    return this.blogService.update(
+      id,
+      updateBlogDto.title, 
+      updateBlogDto.content,
+    );
   }
 
   /**
    * Delete a blog post by id
    */
   @Delete(':id')
-  @ApiParam({ name: 'id' })
   @ApiOkResponse({ description: 'Blog deleted' })
-  delete(@Param('id') id: string): Promise<void> {
-    return this.blogService.delete(+id);
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  delete(@Param('id') id: number): Promise<void> {
+    return this.blogService.delete(id);
   }
 }

@@ -1,6 +1,6 @@
 import { Blog } from "src/blog/entities/blog.entity";
 import { User } from "src/user/entities/user.entity";
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class File {
@@ -22,9 +22,11 @@ export class File {
   @Column()
   contentSize: string;
 
-  @OneToOne(type => User, user => user.profilePicture)
-  user?: User;
+  @ManyToOne(()=>User, user => user.profilePictures)
+  @JoinColumn({ name: "user_id" })
+  user: User;
 
-  @OneToOne(type => Blog, blog => blog.image)
-  blog?: Blog
+  @ManyToOne(()=>Blog, blog => blog.images)
+  @JoinColumn({ name: "blog_id" })
+  blog: Blog;
 }

@@ -13,11 +13,9 @@ export class User {
   @Column()
   email: string;
 
-  @OneToOne(type => File, file => file.user)
-  @JoinColumn()
-  profilePicture?: File;
+  @OneToMany(() => File, file => file.user)
+  profilePictures: File[];
 
-  @OneToMany(type => Blog, blog => blog.user)
-  @JoinColumn()
-  blog?: Blog
+  @OneToMany(() => Blog, blog => blog.author)
+  blogs: Blog[]
 }

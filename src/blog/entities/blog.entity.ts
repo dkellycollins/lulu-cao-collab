@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne, JoinColumn } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne, JoinColumn, OneToMany } from 'typeorm'
 import { User } from 'src/user/entities/user.entity';
 import { File } from 'src/file/entities/file.entity';
 
@@ -9,13 +9,12 @@ export class Blog {
 
   /**
    * The title of the blog
-   * @example Summer Star
    */
   @Column()
   title: string;
 
   /**
-   * @example There is a star in the summer
+   * The content of the blog
    */
   @Column()
   content?: string;
@@ -26,10 +25,10 @@ export class Blog {
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 
-  @OneToOne(type => File, file => file.blog)
-  @JoinColumn()
-  image?: File;
+  @OneToMany(() => File, file => file.blog)
+  images: File[];
 
-  @ManyToOne(type => User, user => user.blog)
-  user: User;
+  @ManyToOne(() => User, user => user.blogs)
+  @JoinColumn({ name: "author_id" })
+  author: User;
 }
