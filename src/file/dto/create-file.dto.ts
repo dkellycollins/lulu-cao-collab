@@ -1,4 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { Blog } from "src/blog/entities/blog.entity";
+import { User } from "src/user/entities/user.entity";
 
 export class CreateFileDto {
   id: number;
@@ -14,7 +15,7 @@ export class CreateFileDto {
 
   contentSize: string;
 
-  user?: string;
+  user?: User;
 
-  blog?: string;
+  blog?: Blog;
 }

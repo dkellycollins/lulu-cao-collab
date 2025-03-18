@@ -12,7 +12,7 @@ export class CreateBlogDto {
   /**
   * Content of the blog
   */
-  content?: string;
+  content: string;
 
   createdAt: Date;
 

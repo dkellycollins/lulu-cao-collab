@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne, JoinColumn, OneToMany } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm'
 import { User } from 'src/user/entities/user.entity';
 import { File } from 'src/file/entities/file.entity';
 
@@ -17,7 +17,7 @@ export class Blog {
    * The content of the blog
    */
   @Column()
-  content?: string;
+  content: string;
 
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

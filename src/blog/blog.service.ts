@@ -15,7 +15,7 @@ export class BlogService {
   }
 
   findOne(id: number): Promise<Blog> {
-    return this.blogRepository.findOneBy({ id });
+    return this.blogRepository.findOne({where: {id}, relations: ['author', 'images']});
   }
 
   async create(title: string, content: string, ): Promise<Blog> {
