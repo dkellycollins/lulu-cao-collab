@@ -16,10 +16,12 @@ import { diskStorage } from 'multer';
           cb(null, filename);
         },
       }),
-    })
+    }),
+    TypeOrmModule.forFeature([File])
   ],
   providers: [FileService],
   controllers: [FileController],
+  exports: [TypeOrmModule.forFeature([File])]
 })
 
 export class FileModule {}

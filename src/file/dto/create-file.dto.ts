@@ -1,12 +1,4 @@
 export class CreateFileDto {
-  /**
-   * File storage provider key
-   */
-  providerKey: string;
-
-  filename: string;
-
-  contentType: string;
-
-  contentSize: string;
+  userId?: string
+  blogId?: string
 }

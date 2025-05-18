@@ -5,55 +5,51 @@ import { File } from './entities/file.entity';
 
 @Injectable()
 export class FileService {
-  // constructor(
-  //   @InjectRepository(File) // Inject the fileRepository
-  //   private fileRepository: Repository<File>,
-  // ) {}
+  constructor(
+    @InjectRepository(File) // Inject the fileRepository
+    private fileRepository: Repository<File>,
+  ) {}
 
-  // findOne(id: number): Promise<File> {
-  //   return this.fileRepository.findOneBy({ id });
-  // }
+  findOne(id: number): Promise<File> {
+    const metadata = this.fileRepository.findOneBy({ id });
+    return metadata
+  }
 
-  // async create(
-  //   providerKey: string, 
-  //   filename: string,
-  //   contentType: string,
-  //   contentSize: string,
-  //   userId?: string,
-  //   blogId?: string
-  // ): Promise<File> {
-  //   if (!userId && !blogId) {
-  //     throw new BadRequestException ("user or blog required")
-  //   }
-  //   const file = this.fileRepository.create({ providerKey, filename, contentType, contentSize });
-  //   return this.fileRepository.save(file);
-  // }
+  async create(
+    file: Express.Multer.File,
+    userId?: string,
+    blogId?: string
+  ): Promise<File> {
+    if (!userId && !blogId) {
+      throw new BadRequestException ("user or blog required")
+    }
+    const metadata = this.fileRepository.create({ 
+      providerKey: file.path, 
+      filename: file.originalname, 
+      contentType: file.mimetype, 
+      contentSize: file.size,
+    });
+    return this.fileRepository.save(metadata);
+  }
 
-  // async update(
-  //   id: number, 
-  //   providerKey?: string, 
-  //   filename?: string,
-  //   contentType?: string,
-  //   contentSize?: string,
-  // ): Promise<File> {
-  //   const file = await this.fileRepository.findOneBy({ id });
-  //   if (!file) throw new NotFoundException(`File with ID ${id} not found`);
+  async update(
+    id: number, 
+    file: Express.Multer.File,
+  ): Promise<File> {
+    const metadata = await this.fileRepository.findOneBy({ id });
+    if (!file) throw new NotFoundException(`File with ID ${id} not found`);
 
-  //   if (providerKey) file.providerKey = providerKey;
-  //   if (filename) file.filename = filename;
-  //   if (contentType) file.contentType = contentType;
-  //   if (contentSize) file.contentSize = contentSize;
+    metadata.providerKey = file.path;
+    metadata.filename = file.originalname;
+    metadata.contentType = file.mimetype;
+    metadata.contentSize = file.size;
 
-  //   return this.fileRepository.save(file);
-  // }
+    return this.fileRepository.save(metadata);
+  }
 
-  // async delete(id: number): Promise<void> {
-  //   const result = await this.fileRepository.delete(id);
-  //   if (result.affected === 0)
-  //     throw new NotFoundException(`File with ID ${id} not found`);
-  // }
-
-  handleFileUpload(file: Express.Multer.File) {
-    return {filePath: file.path}
+  async delete(id: number): Promise<void> {
+    const result = await this.fileRepository.delete(id);
+    if (result.affected === 0)
+      throw new NotFoundException(`File with ID ${id} not found`);
   }
 }
