@@ -17,17 +17,19 @@ export class FileService {
 
   async create(
     file: Express.Multer.File,
-    userId?: string,
-    blogId?: string
+    userId?: number,
+    blogId?: number
   ): Promise<File> {
     if (!userId && !blogId) {
       throw new BadRequestException ("user or blog required")
     }
     const metadata = this.fileRepository.create({ 
-      providerKey: file.path, 
+      providerKey: 'file.path', 
       filename: file.originalname, 
       contentType: file.mimetype, 
       contentSize: file.size,
+      // user_id: userId,
+      // blog_id: blogId
     });
     return this.fileRepository.save(metadata);
   }

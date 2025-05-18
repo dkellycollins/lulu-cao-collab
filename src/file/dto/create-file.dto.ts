@@ -1,4 +1,4 @@
 export class CreateFileDto {
-  userId?: string
-  blogId?: string
+  userId?: number
+  blogId?: number
 }

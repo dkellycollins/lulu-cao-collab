@@ -22,7 +22,7 @@ export class File {
   @Column()
   contentSize: number;
 
-  @ManyToOne(()=>User, user => user.profilePictures)
+  @OneToOne(()=>User, user => user.profilePicture)
   @JoinColumn({ name: "user_id" })
   user?: User;
 

@@ -1,6 +1,6 @@
-import { Controller, Get, Param, Post, Body, Delete, UploadedFile, UseInterceptors, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, ParseFilePipeBuilder, HttpStatus, Put } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Delete, UploadedFile, UseInterceptors, ParseFilePipeBuilder, HttpStatus, Put } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiCreatedResponse, ApiForbiddenResponse, ApiFoundResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags } from "@nestjs/swagger";
+import { ApiCreatedResponse, ApiForbiddenResponse, ApiFoundResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from "@nestjs/swagger";
 import { File } from "./entities/file.entity";
 import { CreateFileDto } from "./dto/create-file.dto";
 import { FileService } from './file.service';

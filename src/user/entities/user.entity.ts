@@ -15,8 +15,8 @@ export class User {
   @IsEmail()
   email: string;
 
-  @OneToMany(() => File, file => file.user)
-  profilePictures?: File[];
+  @OneToOne(() => File, file => file.user)
+  profilePicture?: File;
 
   @OneToMany(() => Blog, blog => blog.author)
   blogs?: Blog[]

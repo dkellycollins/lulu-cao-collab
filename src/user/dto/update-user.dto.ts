@@ -1,6 +1,5 @@
 import { IsEmail } from 'class-validator';
 import { Blog } from 'src/blog/entities/blog.entity';
-import { File } from 'src/file/entities/file.entity';
 
 export class UpdateUserDto {
   id: number;
@@ -9,8 +8,6 @@ export class UpdateUserDto {
 
   @IsEmail()
   email?: string;
-
-  profilePictures?: File[];
 
   blogs?: Blog[];
 }

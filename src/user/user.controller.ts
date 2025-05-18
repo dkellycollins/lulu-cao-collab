@@ -1,5 +1,6 @@
-import { Controller, Get, Param, Post, Put, Delete, Body, Query } from '@nestjs/common';
-import { ApiTags, ApiParam, ApiBearerAuth, ApiCreatedResponse, ApiForbiddenResponse, ApiFoundResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Param, Post, Put, Delete, Body, Query, UploadedFile, ParseFilePipeBuilder, HttpStatus, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiBearerAuth, ApiCreatedResponse, ApiForbiddenResponse, ApiFoundResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { UserService } from './user.service'
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
@@ -36,24 +37,54 @@ export class UserController {
    * Create a new user
    */
   @Post()
+  @UseInterceptors(FileInterceptor('file'))
   @ApiCreatedResponse({ description: 'User created', type: User })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.userService.create(createUserDto)
+  create(
+    @Body() createUserDto: CreateUserDto,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: 'jpeg',
+        })
+        .addMaxSizeValidator({
+          maxSize: 1000000
+        })
+        .build({
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        }),
+    )
+    file: Express.Multer.File
+  ): Promise<User> {
+    return this.userService.create(createUserDto, file)
   }
 
   /**
    * Update a user by id
    */
   @Put(':id')
+  @UseInterceptors(FileInterceptor('file'))
   @ApiOkResponse({ description: 'User updated', type: User })
   @ApiNotFoundResponse({ description: 'User not found' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   update(
     @Param('id') id: number,
-    @Body() updateUserDto: UpdateUserDto
+    @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: 'jpeg',
+        })
+        .addMaxSizeValidator({
+          maxSize: 1000000
+        })
+        .build({
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        }),
+    )
+    file: Express.Multer.File
   ): Promise<User> {
-    return this.userService.update(id, updateUserDto)
+    return this.userService.update(id, updateUserDto, file)
   }
 
   /**
