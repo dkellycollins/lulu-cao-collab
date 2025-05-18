@@ -13,7 +13,7 @@ export class UserService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Blog) private readonly blogRepository: Repository<Blog>,
-    @InjectRepository(File) private readonly fileRepository: Repository<File>,
+    // @InjectRepository(File) private readonly fileRepository: Repository<File>,
   ) {}
 
   findOneById(id: number): Promise<User> {
@@ -38,7 +38,7 @@ export class UserService {
           file.filename = fileDto.filename;
           file.contentType = fileDto.contentType;
           file.contentSize = fileDto.contentSize;
-          await this.fileRepository.save(file);
+          // await this.fileRepository.save(file);
           user.profilePictures.push(file);
         }
       }
@@ -97,7 +97,7 @@ export class UserService {
           let existingFile: File | null = null;
       
           if (fileDto.id) {
-            existingFile = await this.fileRepository.findOneBy({ id: fileDto.id });
+            // existingFile = await this.fileRepository.findOneBy({ id: fileDto.id });
           }
       
           if (existingFile) {
@@ -109,7 +109,7 @@ export class UserService {
           file.contentType = fileDto.contentType;
           file.contentSize = fileDto.contentSize;
       
-          await this.fileRepository.save(file);
+          // await this.fileRepository.save(file);
           user.profilePictures.push(file);
         }
       }

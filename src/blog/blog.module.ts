@@ -8,7 +8,7 @@ import { FileModule } from 'src/file/file.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Blog]), // Ensure Blog repository is provided
-    FileModule // Import FileModule to get FileRepository
+    // FileModule // Import FileModule to get FileRepository
   ], 
   controllers: [BlogController],
   providers: [BlogService],
