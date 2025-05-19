@@ -21,7 +21,7 @@ import { diskStorage } from 'multer';
   ],
   providers: [FileService],
   controllers: [FileController],
-  exports: [TypeOrmModule.forFeature([File]), FileService]
+  exports: [FileService]
 })
 
 export class FileModule {}

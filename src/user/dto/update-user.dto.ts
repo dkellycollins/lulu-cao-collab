@@ -1,5 +1,4 @@
 import { IsEmail } from 'class-validator';
-import { Blog } from 'src/blog/entities/blog.entity';
 
 export class UpdateUserDto {
   id: number;
@@ -8,6 +7,4 @@ export class UpdateUserDto {
 
   @IsEmail()
   email?: string;
-
-  blogs?: Blog[];
 }

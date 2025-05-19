@@ -2,7 +2,6 @@ import { Injectable, NotFoundException, InternalServerErrorException, Logger } f
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { Blog } from '../blog/entities/blog.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { FileService } from '../file/file.service';
@@ -13,7 +12,6 @@ export class UserService {
   constructor(
     private readonly fileService: FileService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    @InjectRepository(Blog) private readonly blogRepository: Repository<Blog>,
   ) {}
 
   findOneById(id: number): Promise<User> {
@@ -56,37 +54,15 @@ export class UserService {
         });
       }
 
-      const { username, email, blogs } = updateUserDto;
+      const { username, email } = updateUserDto;
       if (username) user.username = username;
       if (email) user.email = email;
-      if (blogs) {
-        user.blogs = user.blogs || [];
-
-        for (const blogDto of blogs) {
-          let blog = new Blog();
-          let existingBlog: Blog | null = null;
-      
-          if (blogDto.id) {
-            existingBlog = await this.blogRepository.findOneBy({ id: blogDto.id });
-          }
-      
-          if (existingBlog) {
-            blog = existingBlog;
-          }
-      
-          blog.title = blogDto.title;
-          blog.content = blogDto.content;
-          await this.blogRepository.save(blog);
-          user.blogs.push(blog);
-        }
-      }
       
       if (file) {
-        user.profilePicture = await this.fileService.create(file);
+        user.profilePicture = await this.fileService.create(file, id);
       }
 
       return await this.userRepository.save(user);
-
     } catch (error) {
       this.logger.error(`Error updating user with ID: ${id}`, error.stack);
       throw new InternalServerErrorException({

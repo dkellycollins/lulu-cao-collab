@@ -1,5 +1,4 @@
 import { File } from "src/file/entities/file.entity";
-import { User } from "src/user/entities/user.entity";
 
 export class CreateBlogDto {
   id: number;
@@ -19,7 +18,5 @@ export class CreateBlogDto {
   updatedAt: Date;
 
   image?: File;
-
-  user: User;
 }
 
