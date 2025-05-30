@@ -12,6 +12,7 @@ import { UserModule } from '../user/user.module';
 // import { Review } from 'src/review/entities/review.entity';
 import { File } from '../file/entities/file.entity';
 import { FileModule } from '../file/file.module';
+import migrations from '../migrations';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { FileModule } from '../file/file.module';
       type: 'sqlite',
       database: 'db',
       entities: [Blog, User, File],
+      migrations: migrations
     }),
     UserModule,
     BlogModule,
