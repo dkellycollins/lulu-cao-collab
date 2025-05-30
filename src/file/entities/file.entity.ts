@@ -1,5 +1,5 @@
-import { Blog } from "src/blog/entities/blog.entity";
-import { User } from "src/user/entities/user.entity";
+import { Blog } from "../../blog/entities/blog.entity";
+import { User } from "../../user/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
