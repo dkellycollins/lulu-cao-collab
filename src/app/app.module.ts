@@ -20,7 +20,8 @@ import migrations from '../migrations';
       type: 'sqlite',
       database: 'db',
       entities: [Blog, User, File],
-      migrations: migrations
+      migrations: migrations,
+      migrationsRun: true,
     }),
     UserModule,
     BlogModule,
