@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { File } from './entities/file.entity';
@@ -10,8 +10,13 @@ export class FileService {
     private fileRepository: Repository<File>,
   ) {}
 
-  findOne(id: number): Promise<File> {
+  async findOne(id: number): Promise<File> {
     const metadata = this.fileRepository.findOneBy({ id });
+
+    if (!metadata) {
+      throw new NotFoundException(`File with id ${id} not found`);
+    }
+
     return metadata
   }
 

@@ -1,8 +1,9 @@
-import { Controller, Get, Param, Post, Body, Delete, UploadedFile, UseInterceptors, ParseFilePipeBuilder, HttpStatus, Put } from '@nestjs/common';
+import { Controller, Get, Param, Post, Delete, UploadedFile, UseInterceptors, ParseFilePipeBuilder, HttpStatus, Put } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiCreatedResponse, ApiForbiddenResponse, ApiFoundResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from "@nestjs/swagger";
-import { File } from "./entities/file.entity";
 import { FileService } from './file.service';
+import { FileResponseDto } from './dto/file-response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @ApiTags('files')
 @Controller()
@@ -13,10 +14,11 @@ export class FileController {
    * Get a file by id
    */
   @Get('files/:id')
-  @ApiFoundResponse({ description: 'File found', type: File })
+  @ApiFoundResponse({ description: 'File found', type: FileResponseDto })
   @ApiNotFoundResponse({ description: 'File not found' })
-  findOne(@Param('id') id: number): Promise<File> {
-    return this.fileService.findOne(id)
+  async findOne(@Param('id') id: number): Promise<FileResponseDto> {
+    const file = this.fileService.findOne(id);
+    return plainToInstance(FileResponseDto, file)
   }
 
   /**
@@ -24,7 +26,7 @@ export class FileController {
    */
   @Post('files')
   @UseInterceptors(FileInterceptor('file'))
-  @ApiCreatedResponse({ description: 'File created', type: File })
+  @ApiCreatedResponse({ description: 'File created', type: FileResponseDto })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   uploadFileAndPassValidation(  
     @UploadedFile(
@@ -41,7 +43,8 @@ export class FileController {
     )
    file: Express.Multer.File
   ) {
-    return this.fileService.create(file, 1)
+    const newFile = this.fileService.create(file, 1);
+    return plainToInstance(FileResponseDto, newFile)
   }
 
   /**
@@ -49,7 +52,7 @@ export class FileController {
    */
   @Post('users/:id/avatar')
   @UseInterceptors(FileInterceptor('file'))
-  @ApiCreatedResponse({ description: 'File created', type: File })
+  @ApiCreatedResponse({ description: 'File created', type: FileResponseDto })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   uploadAvatarAndPassValidation(  
     @Param('id') id: number,
@@ -67,7 +70,8 @@ export class FileController {
     )
    file: Express.Multer.File
   ) {
-    return this.fileService.create(file, id)
+    const newFile = this.fileService.create(file, id);
+    return plainToInstance(FileResponseDto, newFile)
   }
 
   /**
@@ -75,7 +79,7 @@ export class FileController {
    */
   @Post('blogs/:id/blog-cover')
   @UseInterceptors(FileInterceptor('file'))
-  @ApiCreatedResponse({ description: 'File created', type: File })
+  @ApiCreatedResponse({ description: 'File created', type: FileResponseDto })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   uploadBlogCoverAndPassValidation(  
     @Param('id') id: number,
@@ -93,15 +97,16 @@ export class FileController {
     )
     file: Express.Multer.File
   ) {
-    return this.fileService.create(file, id)
+    const newFile = this.fileService.create(file, id);
+    return plainToInstance(FileResponseDto, newFile);
   }
 
   /**
-   * Upload a file
+   * Update a file
    */
   @Put('files/:id')
   @UseInterceptors(FileInterceptor('file'))
-  @ApiOkResponse({ description: 'File updated', type: File })
+  @ApiOkResponse({ description: 'File updated', type: FileResponseDto })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   updateFile(  
     @Param('id') id: number,
@@ -119,7 +124,8 @@ export class FileController {
     )
    file: Express.Multer.File
   ) {
-    return this.fileService.update(id, file)
+    const updatedFile = this.fileService.update(id, file);
+    return plainToInstance(FileResponseDto, updatedFile)
   }
   
   /**

@@ -14,12 +14,24 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  findOneById(id: number): Promise<User> {
-    return this.userRepository.findOneBy({ id });
+  async findOneById(id: number): Promise<User> {
+    const user = this.userRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    return user;
   }
 
-  findOneByUsername(username: string): Promise<User> {
-    return this.userRepository.findOneBy({ username });
+  async findOneByUsername(username: string): Promise<User> {
+    const user = this.userRepository.findOneBy({ username });
+
+    if (!user) {
+      throw new NotFoundException(`User with username ${username} not found`);
+    }
+
+    return user;
   }
 
   async create(createUserDto: CreateUserDto, file: Express.Multer.File): Promise<User> {

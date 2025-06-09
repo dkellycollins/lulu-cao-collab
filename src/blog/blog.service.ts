@@ -12,14 +12,26 @@ export class BlogService {
     private readonly userService: UserService
   ) {}
 
-  findAll(): Promise<Blog[]> {
-    return this.blogRepository.find();
+  async findOne(id: number): Promise<Blog> {
+    const blog = await this.blogRepository.findOne({ where: { id }, relations: ['images'] });
+  
+    if (!blog) {
+      throw new NotFoundException(`Blog with ID ${id} not found`);
+    }
+  
+    return blog;
   }
 
-  findOne(id: number): Promise<Blog> {
-    return this.blogRepository.findOne({where: {id}, relations: ['author', 'images']});
-  }
+  async findAll(): Promise<Blog[]> {
+    const blogs = this.blogRepository.find();
 
+    if (!blogs) {
+      throw new NotFoundException(`No blogs available`);
+    }
+
+    return blogs;
+  }
+  
   async create(title: string, content: string, userId: number): Promise<Blog> {
     const blog = this.blogRepository.create({ title, content });
     blog.author = await this.userService.findOneById(userId)
