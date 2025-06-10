@@ -4,6 +4,4 @@ export class FileResponseDto {
   filename: string;
   contentType: string;
   contentSize: number;
-  userId?: number;
-  blogId?: number;
 }

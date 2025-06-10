@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne } from 'typeorm'
 import { User } from 'src/user/entities/user.entity';
 import { File } from 'src/file/entities/file.entity';
 
@@ -7,16 +7,10 @@ export class Blog {
   @PrimaryGeneratedColumn()
   id: number;
 
-  /**
-   * The title of the blog
-   */
   @Column()
   title: string;
 
-  /**
-   * The content of the blog
-   */
-  @Column()
+  @Column('text')
   content: string;
 
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
@@ -25,10 +19,11 @@ export class Blog {
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 
-  @OneToMany(() => File, file => file.blog)
-  images?: File[];
+  @OneToOne(() => File, { cascade: true, eager: true, nullable: true })
+  @JoinColumn({ name: 'cover_image_id' })
+  coverImage?: File; // coverImage now owns the relationship via foreign key (cover_image_id)
 
   @ManyToOne(() => User, user => user.blogs)
-  @JoinColumn({ name: "author_id" })
+  @JoinColumn({ name: 'author_id' })
   author: User;
 }

@@ -2,6 +2,6 @@
 export class CreateBlogDto {
   title: string;
   content: string;
-  imageId?: number;
+  coverImageId?: number;
 }
 

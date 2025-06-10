@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional } from 'class-validator';
+import { IsString, IsNumber } from 'class-validator';
 
 export class CreateFileDto {
   @IsString()
@@ -12,12 +12,4 @@ export class CreateFileDto {
 
   @IsNumber()
   contentSize: number;
-
-  @IsOptional()
-  @IsNumber()
-  userId?: number;
-
-  @IsOptional()
-  @IsNumber()
-  blogId?: number;
 }

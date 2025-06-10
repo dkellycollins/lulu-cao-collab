@@ -48,60 +48,6 @@ export class FileController {
   }
 
   /**
-   * Create a new avatar
-   */
-  @Post('users/:id/avatar')
-  @UseInterceptors(FileInterceptor('file'))
-  @ApiCreatedResponse({ description: 'File created', type: FileResponseDto })
-  @ApiForbiddenResponse({ description: 'Forbidden' })
-  uploadAvatarAndPassValidation(  
-    @Param('id') id: number,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: 'jpeg',
-        })
-        .addMaxSizeValidator({
-          maxSize: 1000000
-        })
-        .build({
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        }),
-    )
-   file: Express.Multer.File
-  ) {
-    const newFile = this.fileService.create(file, id);
-    return plainToInstance(FileResponseDto, newFile)
-  }
-
-  /**
-   * Create a new blog cover image
-   */
-  @Post('blogs/:id/blog-cover')
-  @UseInterceptors(FileInterceptor('file'))
-  @ApiCreatedResponse({ description: 'File created', type: FileResponseDto })
-  @ApiForbiddenResponse({ description: 'Forbidden' })
-  uploadBlogCoverAndPassValidation(  
-    @Param('id') id: number,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: 'jpeg',
-        })
-        .addMaxSizeValidator({
-          maxSize: 1000000
-        })
-        .build({
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        }),
-    )
-    file: Express.Multer.File
-  ) {
-    const newFile = this.fileService.create(file, id);
-    return plainToInstance(FileResponseDto, newFile);
-  }
-
-  /**
    * Update a file
    */
   @Put('files/:id')

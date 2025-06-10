@@ -7,5 +7,5 @@ export class BlogResponseDto {
   content: string;
   createdAt: Date;
   updatedAt: Date;
-  image?: FileResponseDto;
+  coverImage?: FileResponseDto;
 }
