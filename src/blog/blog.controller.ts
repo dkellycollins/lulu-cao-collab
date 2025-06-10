@@ -37,14 +37,14 @@ export class BlogController {
   /**
    * Create a new blog post
    */
-  @Post('users/:id/blogs')
+  @Post('blogs')
   @ApiCreatedResponse({ description: 'Blog created', type: BlogResponseDto })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  async create(@Body() createBlogDto: CreateBlogDto, @Param('id') id: number): Promise<BlogResponseDto> {
+  async create(@Body() createBlogDto: CreateBlogDto): Promise<BlogResponseDto> {
     const blog = this.blogService.create(
       createBlogDto.title, 
       createBlogDto.content,
-      id
+      createBlogDto.userId,
     );
 
     return plainToInstance(BlogResponseDto, blog);
