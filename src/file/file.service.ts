@@ -20,7 +20,7 @@ export class FileService {
     return metadata
   }
 
-  async create(file: Express.Multer.File, id: number, type?: string): Promise<File> {
+  async create(file: Express.Multer.File): Promise<File> {
     const metadata = this.fileRepository.create({ 
       providerKey: file.path, 
       filename: file.originalname, 

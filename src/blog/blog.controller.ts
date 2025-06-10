@@ -41,11 +41,7 @@ export class BlogController {
   @ApiCreatedResponse({ description: 'Blog created', type: BlogResponseDto })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   async create(@Body() createBlogDto: CreateBlogDto): Promise<BlogResponseDto> {
-    const blog = this.blogService.create(
-      createBlogDto.title, 
-      createBlogDto.content,
-      createBlogDto.userId,
-    );
+    const blog = this.blogService.create(createBlogDto);
 
     return plainToInstance(BlogResponseDto, blog);
   }
@@ -60,11 +56,7 @@ export class BlogController {
     @Param('id') id: number,
     @Body() updateBlogDto: UpdateBlogDto,
   ): Promise<BlogResponseDto> {
-    const updatedBlog = this.blogService.update(
-      id,
-      updateBlogDto.title, 
-      updateBlogDto.content,
-    );
+    const updatedBlog = this.blogService.update(id, updateBlogDto);
 
     return plainToInstance(BlogResponseDto, updatedBlog)
   }

@@ -41,26 +41,10 @@ export class UserController {
    * Create a new user
    */
   @Post()
-  @UseInterceptors(FileInterceptor('file'))
   @ApiCreatedResponse({ description: 'User created', type: UserResponseDto })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  async create(
-    @Body() createUserDto: CreateUserDto,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: 'jpeg',
-        })
-        .addMaxSizeValidator({
-          maxSize: 1000000
-        })
-        .build({
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        }),
-    )
-    file: Express.Multer.File
-  ): Promise<UserResponseDto> {
-    const user = this.userService.create(createUserDto, file);
+  async create(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
+    const user = this.userService.create(createUserDto);
     return plainToInstance(UserResponseDto, user)
   }
 
@@ -68,28 +52,11 @@ export class UserController {
    * Update a user by id
    */
   @Put(':id')
-  @UseInterceptors(FileInterceptor('file'))
   @ApiOkResponse({ description: 'User updated', type: User })
   @ApiNotFoundResponse({ description: 'User not found' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  async update(
-    @Param('id') id: number,
-    @Body() updateUserDto: UpdateUserDto,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: 'jpeg',
-        })
-        .addMaxSizeValidator({
-          maxSize: 1000000
-        })
-        .build({
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        }),
-    )
-    file: Express.Multer.File
-  ): Promise<UserResponseDto> {
-    const user = this.userService.update(id, updateUserDto, file)
+  async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
+    const user = this.userService.update(id, updateUserDto)
     return plainToInstance(UserResponseDto, user)
   }
 

@@ -34,14 +34,14 @@ export class UserService {
     return user;
   }
 
-  async create(createUserDto: CreateUserDto, file: Express.Multer.File): Promise<User> {
+  async create(createUserDto: CreateUserDto): Promise<User> {
     try {
-      const { username, email } = createUserDto;
+      const { username, email, profilePictureId } = createUserDto;
       const user = this.userRepository.create({username: username, email: email});
       await this.userRepository.save(user);
 
-      if (file) {
-        user.profilePicture = await this.fileService.create(file, user.id);
+      if (profilePictureId) {
+        user.profilePicture = await this.fileService.findOne(profilePictureId);
       }
 
       return await this.userRepository.save(user);
@@ -55,7 +55,7 @@ export class UserService {
     }
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto, file: Express.Multer.File): Promise<User> {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     try {
       const user = await this.userRepository.findOne({ where: { id }, relations: ['blogs', 'profilePictures'] });
 
@@ -66,12 +66,12 @@ export class UserService {
         });
       }
 
-      const { username, email } = updateUserDto;
+      const { username, email, profilePictureId } = updateUserDto;
       if (username) user.username = username;
       if (email) user.email = email;
       
-      if (file) {
-        user.profilePicture = await this.fileService.create(file, id);
+      if (profilePictureId) {
+        user.profilePicture = await this.fileService.findOne(profilePictureId);
       }
 
       return await this.userRepository.save(user);
@@ -86,8 +86,11 @@ export class UserService {
   }
 
   async delete(id: number): Promise<void> {
-    const result = await this.userRepository.delete(id);
-    if (result.affected === 0)
-      throw new NotFoundException(`User with ID ${id} not found`);
+    const user = await this.findOneById(id);
+    if (!user) throw new NotFoundException(`User with ID ${id} not found`);
+    if (user.profilePicture) {
+      await this.fileService.delete(user.profilePicture.id);
+    }
+    await this.userRepository.delete(id);
   }
 }

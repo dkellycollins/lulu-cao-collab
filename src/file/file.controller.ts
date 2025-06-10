@@ -43,7 +43,7 @@ export class FileController {
     )
    file: Express.Multer.File
   ) {
-    const newFile = this.fileService.create(file, 1);
+    const newFile = this.fileService.create(file);
     return plainToInstance(FileResponseDto, newFile)
   }
 
