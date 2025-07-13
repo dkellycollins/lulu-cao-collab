@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Blog } from './entities/blog.entity';
 import { UserService } from '../user/user.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
-import { FileService } from 'src/file/file.service';
+import { FileService } from '../file/file.service';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 
 @Injectable()

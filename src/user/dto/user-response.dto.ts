@@ -1,6 +1,6 @@
 import { IsEmail, IsNumber, IsOptional, IsString } from 'class-validator';
-import { BlogResponseDto } from 'src/blog/dto/blog-response.dto';
-import { FileResponseDto } from 'src/file/dto/file-response.dto';
+import { BlogResponseDto } from '../../blog/dto/blog-response.dto';
+import { FileResponseDto } from '../../file/dto/file-response.dto';
 
 export class UserResponseDto {
   @IsNumber()
