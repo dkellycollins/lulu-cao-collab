@@ -1,20 +1,19 @@
 import { Controller, Get, Delete, Post } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ApiOkResponse } from '@nestjs/swagger';
-import { Blog } from 'src/blog/entities/blog.entity';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   /**
-   * Get featured blogs
+   * Root path
    * @returns 
    */
   @Get()
-  @ApiOkResponse({ type: [Blog] })
-  getFeaturedBlogs(): string {
-    return this.appService.getFeaturedBlogs();
+  @ApiOkResponse({ description: "VibeReads - A list of featured blogs coming soon..." })
+  hello(): string {
+    return this.appService.hello();
   }
 
   // @Post()

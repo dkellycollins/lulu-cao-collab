@@ -1,9 +1,12 @@
-import { Controller, Get, Param, Post, Put, Delete, Body, Query } from '@nestjs/common';
-import { ApiTags, ApiParam, ApiBearerAuth, ApiCreatedResponse, ApiForbiddenResponse, ApiFoundResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Param, Post, Put, Delete, Body, Query, UploadedFile, ParseFilePipeBuilder, HttpStatus, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiBearerAuth, ApiCreatedResponse, ApiForbiddenResponse, ApiFoundResponse, ApiNotFoundResponse, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { UserService } from './user.service'
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserResponseDto } from './dto/user-response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @ApiBearerAuth()
 @ApiTags('users')
@@ -17,8 +20,9 @@ export class UserController {
   @Get(':id')
   @ApiFoundResponse({ description: 'User found' })
   @ApiNotFoundResponse({ description: 'User not found' })
-  findOne(@Param('id') id: number): Promise<User> {
-    return this.userService.findOneById(+id)
+  async findOne(@Param('id') id: number): Promise<UserResponseDto> {
+    const user = this.userService.findOneById(+id)
+    return plainToInstance(UserResponseDto, user)
   }
 
   /**
@@ -28,18 +32,20 @@ export class UserController {
   @ApiQuery({ name: 'username' })
   @ApiFoundResponse({ description: 'User found'})
   @ApiNotFoundResponse({ description: 'User not found' })
-  findOneByUsername(@Query('username') username: string): Promise<User> {
-    return this.userService.findOneByUsername(username)
+  async findOneByUsername(@Query('username') username: string): Promise<UserResponseDto> {
+    const user = this.userService.findOneByUsername(username)
+    return plainToInstance(UserResponseDto, user)
   }
 
   /**
    * Create a new user
    */
   @Post()
-  @ApiCreatedResponse({ description: 'User created', type: User })
+  @ApiCreatedResponse({ description: 'User created', type: UserResponseDto })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.userService.create(createUserDto)
+  async create(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
+    const user = this.userService.create(createUserDto);
+    return plainToInstance(UserResponseDto, user)
   }
 
   /**
@@ -49,11 +55,9 @@ export class UserController {
   @ApiOkResponse({ description: 'User updated', type: User })
   @ApiNotFoundResponse({ description: 'User not found' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  update(
-    @Param('id') id: number,
-    @Body() updateUserDto: UpdateUserDto
-  ): Promise<User> {
-    return this.userService.update(id, updateUserDto)
+  async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
+    const user = this.userService.update(id, updateUserDto)
+    return plainToInstance(UserResponseDto, user)
   }
 
   /**

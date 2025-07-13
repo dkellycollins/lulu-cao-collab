@@ -1,5 +1,5 @@
-import { Blog } from 'src/blog/entities/blog.entity';
-import { File } from 'src/file/entities/file.entity';
+import { Blog } from '../../blog/entities/blog.entity';
+import { File } from '../../file/entities/file.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, OneToMany } from 'typeorm'
 import { IsEmail } from 'class-validator';
 
@@ -15,9 +15,10 @@ export class User {
   @IsEmail()
   email: string;
 
-  @OneToMany(() => File, file => file.user)
-  profilePictures?: File[];
+  @OneToOne(() => File, { cascade: true, eager: true, nullable: true })
+  @JoinColumn({ name: 'profile_picture_id' })
+  profilePicture?: File; // profilePicture now owns the relationship via foreign key (profile_picture_id)
 
   @OneToMany(() => Blog, blog => blog.author)
-  blogs?: Blog[]
+  blogs?: Blog[];
 }

@@ -1,16 +1,4 @@
-import { IsEmail } from 'class-validator';
-import { Blog } from 'src/blog/entities/blog.entity';
-import { File } from 'src/file/entities/file.entity';
+import { PartialType } from '@nestjs/swagger';
+import { CreateUserDto } from './create-user.dto';
 
-export class UpdateUserDto {
-  id: number;
-  
-  username?: string;
-
-  @IsEmail()
-  email?: string;
-
-  profilePictures?: File[];
-
-  blogs?: Blog[];
-}
+export class UpdateUserDto extends PartialType(CreateUserDto) {}

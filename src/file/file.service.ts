@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { File } from './entities/file.entity';
@@ -10,41 +10,40 @@ export class FileService {
     private fileRepository: Repository<File>,
   ) {}
 
-  findOne(id: number): Promise<File> {
-    return this.fileRepository.findOneBy({ id });
+  async findOne(id: number): Promise<File> {
+    const metadata = this.fileRepository.findOneBy({ id });
+
+    if (!metadata) {
+      throw new NotFoundException(`File with id ${id} not found`);
+    }
+
+    return metadata
   }
 
-  async create(
-    providerKey: string, 
-    filename: string,
-    contentType: string,
-    contentSize: string,
-    userId?: string,
-    blogId?: string
-  ): Promise<File> {
-    if (!userId && !blogId) {
-      throw new BadRequestException ("user or blog required")
-    }
-    const file = this.fileRepository.create({ providerKey, filename, contentType, contentSize });
-    return this.fileRepository.save(file);
+  async create(file: Express.Multer.File): Promise<File> {
+    const metadata = this.fileRepository.create({ 
+      providerKey: file.path, 
+      filename: file.originalname, 
+      contentType: file.mimetype, 
+      contentSize: file.size,
+    });
+
+    return this.fileRepository.save(metadata);
   }
 
   async update(
     id: number, 
-    providerKey?: string, 
-    filename?: string,
-    contentType?: string,
-    contentSize?: string,
+    file: Express.Multer.File,
   ): Promise<File> {
-    const file = await this.fileRepository.findOneBy({ id });
+    const metadata = await this.fileRepository.findOneBy({ id });
     if (!file) throw new NotFoundException(`File with ID ${id} not found`);
 
-    if (providerKey) file.providerKey = providerKey;
-    if (filename) file.filename = filename;
-    if (contentType) file.contentType = contentType;
-    if (contentSize) file.contentSize = contentSize;
+    metadata.providerKey = file.path;
+    metadata.filename = file.originalname;
+    metadata.contentType = file.mimetype;
+    metadata.contentSize = file.size;
 
-    return this.fileRepository.save(file);
+    return this.fileRepository.save(metadata);
   }
 
   async delete(id: number): Promise<void> {

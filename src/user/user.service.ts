@@ -2,46 +2,48 @@ import { Injectable, NotFoundException, InternalServerErrorException, Logger } f
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { Blog } from '../blog/entities/blog.entity';
-import { File } from '../file/entities/file.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { FileService } from '../file/file.service';
 
 @Injectable()
 export class UserService {
   private readonly logger = new Logger(UserService.name); 
   constructor(
+    private readonly fileService: FileService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    @InjectRepository(Blog) private readonly blogRepository: Repository<Blog>,
-    @InjectRepository(File) private readonly fileRepository: Repository<File>,
   ) {}
 
-  findOneById(id: number): Promise<User> {
-    return this.userRepository.findOneBy({ id });
+  async findOneById(id: number): Promise<User> {
+    const user = this.userRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    return user;
   }
 
-  findOneByUsername(username: string): Promise<User> {
-    return this.userRepository.findOneBy({ username });
+  async findOneByUsername(username: string): Promise<User> {
+    const user = this.userRepository.findOneBy({ username });
+
+    if (!user) {
+      throw new NotFoundException(`User with username ${username} not found`);
+    }
+
+    return user;
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     try {
-      const {username, email, profilePictures} = createUserDto;
+      const { username, email, profilePictureId } = createUserDto;
       const user = this.userRepository.create({username: username, email: email});
       await this.userRepository.save(user);
-      if (profilePictures) {
-        user.profilePictures = [];
 
-        for (const fileDto of profilePictures) {
-          const file = new File();
-          file.providerKey = fileDto.providerKey;
-          file.filename = fileDto.filename;
-          file.contentType = fileDto.contentType;
-          file.contentSize = fileDto.contentSize;
-          await this.fileRepository.save(file);
-          user.profilePictures.push(file);
-        }
+      if (profilePictureId) {
+        user.profilePicture = await this.fileService.findOne(profilePictureId);
       }
+
       return await this.userRepository.save(user);
     } catch (error) {
       this.logger.error(`Error creating the new user`, error.stack);
@@ -64,58 +66,15 @@ export class UserService {
         });
       }
 
-      const { username, email, blogs, profilePictures } = updateUserDto;
+      const { username, email, profilePictureId } = updateUserDto;
       if (username) user.username = username;
       if (email) user.email = email;
-      if (blogs) {
-        user.blogs = user.blogs || [];
-
-        for (const blogDto of blogs) {
-          let blog = new Blog();
-          let existingBlog: Blog | null = null;
       
-          if (blogDto.id) {
-            existingBlog = await this.blogRepository.findOneBy({ id: blogDto.id });
-          }
-      
-          if (existingBlog) {
-            blog = existingBlog;
-          }
-      
-          blog.title = blogDto.title;
-          blog.content = blogDto.content;
-          await this.blogRepository.save(blog);
-          user.blogs.push(blog);
-        }
-      }
-      
-      if (profilePictures) {
-        user.profilePictures = user.profilePictures || [];
-      
-        for (const fileDto of profilePictures) {
-          let file = new File();
-          let existingFile: File | null = null;
-      
-          if (fileDto.id) {
-            existingFile = await this.fileRepository.findOneBy({ id: fileDto.id });
-          }
-      
-          if (existingFile) {
-            file = existingFile;
-          }
-      
-          file.providerKey = fileDto.providerKey;
-          file.filename = fileDto.filename;
-          file.contentType = fileDto.contentType;
-          file.contentSize = fileDto.contentSize;
-      
-          await this.fileRepository.save(file);
-          user.profilePictures.push(file);
-        }
+      if (profilePictureId) {
+        user.profilePicture = await this.fileService.findOne(profilePictureId);
       }
 
       return await this.userRepository.save(user);
-
     } catch (error) {
       this.logger.error(`Error updating user with ID: ${id}`, error.stack);
       throw new InternalServerErrorException({
@@ -127,8 +86,11 @@ export class UserService {
   }
 
   async delete(id: number): Promise<void> {
-    const result = await this.userRepository.delete(id);
-    if (result.affected === 0)
-      throw new NotFoundException(`User with ID ${id} not found`);
+    const user = await this.findOneById(id);
+    if (!user) throw new NotFoundException(`User with ID ${id} not found`);
+    if (user.profilePicture) {
+      await this.fileService.delete(user.profilePicture.id);
+    }
+    await this.userRepository.delete(id);
   }
 }

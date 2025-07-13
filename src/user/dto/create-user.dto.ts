@@ -1,11 +1,12 @@
-import { IsEmail } from 'class-validator';
-import { File } from 'src/file/entities/file.entity';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class CreateUserDto {
+  @IsString()
   username: string;
 
   @IsEmail()
   email: string;
 
-  profilePictures?: File[];
+  @IsOptional()
+  profilePictureId?: number; 
 }

@@ -1,70 +1,70 @@
 import { Controller, Get, Post, Param, Body, Put, Delete } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags, ApiOperation, ApiParam, ApiOkResponse, ApiCreatedResponse, ApiFoundResponse, ApiNotFoundResponse, ApiForbiddenResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiOkResponse, ApiCreatedResponse, ApiFoundResponse, ApiNotFoundResponse, ApiForbiddenResponse } from '@nestjs/swagger';
 import { BlogService } from './blog.service';
-import { Blog } from './entities/blog.entity'
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
+import { BlogResponseDto } from './dto/blog-response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @ApiBearerAuth()
 @ApiTags('blogs') // Naming a nesting route called `/blogs`
-@Controller('blogs') 
+@Controller() 
 export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
   /**
-   * Get all blog posts
+   * Get a blog post by id
    */
-  @Get()
-  @ApiFoundResponse({ description: 'Blogs found', type: [Blog] })
-  @ApiNotFoundResponse({ description: 'No blog found' })
-  findAll(): Promise<Blog[]> {
-    return this.blogService.findAll();
+  @Get('blogs/:id')
+  @ApiFoundResponse({ description: 'Blog found', type: BlogResponseDto })
+  @ApiNotFoundResponse({ description: 'Blog not found' })
+  async findOne(@Param('id') id: number): Promise<BlogResponseDto> {
+    const blog = await this.blogService.findOne(id);
+    return plainToInstance(BlogResponseDto, blog)
   }
 
   /**
-   * Get a blog post by id
+   * Get all blog posts
    */
-  @Get(':id')
-  @ApiFoundResponse({ description: 'Blog found' })
-  @ApiNotFoundResponse({ description: 'Blog not found' })
-  findOne(@Param('id') id: number): Promise<Blog> {
-    return this.blogService.findOne(id);
+  @Get('blogs')
+  @ApiFoundResponse({ description: 'Blogs found', type: [BlogResponseDto] })
+  @ApiNotFoundResponse({ description: 'No blog found' })
+  async findAll(): Promise<BlogResponseDto[]> {
+    const blogs = await this.blogService.findAll();
+    return blogs.map(blog => plainToInstance(BlogResponseDto, blog));
   }
 
   /**
    * Create a new blog post
    */
-  @Post()
-  @ApiCreatedResponse({ description: 'Blog created', type: Blog })
+  @Post('blogs')
+  @ApiCreatedResponse({ description: 'Blog created', type: BlogResponseDto })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  create(@Body() createBlogDto: CreateBlogDto): Promise<Blog> {
-    return this.blogService.create(
-      createBlogDto.title, 
-      createBlogDto.content
-    );
+  async create(@Body() createBlogDto: CreateBlogDto): Promise<BlogResponseDto> {
+    const blog = this.blogService.create(createBlogDto);
+
+    return plainToInstance(BlogResponseDto, blog);
   }
 
   /**
    * Update a blog post by id
    */
-  @Put(':id')
-  @ApiOkResponse({ description: 'Blog updated', type: Blog })
+  @Put('blogs/:id')
+  @ApiOkResponse({ description: 'Blog updated', type: BlogResponseDto })
   @ApiNotFoundResponse({ description: 'Blog not found' })
-  update(
+  async update(
     @Param('id') id: number,
     @Body() updateBlogDto: UpdateBlogDto,
-  ): Promise<Blog> {
-    return this.blogService.update(
-      id,
-      updateBlogDto.title, 
-      updateBlogDto.content,
-    );
+  ): Promise<BlogResponseDto> {
+    const updatedBlog = this.blogService.update(id, updateBlogDto);
+
+    return plainToInstance(BlogResponseDto, updatedBlog)
   }
 
   /**
    * Delete a blog post by id
    */
-  @Delete(':id')
+  @Delete('blogs/:id')
   @ApiOkResponse({ description: 'Blog deleted' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   delete(@Param('id') id: number): Promise<void> {
