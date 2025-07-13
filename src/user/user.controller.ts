@@ -5,6 +5,8 @@ import { UserService } from './user.service'
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserResponseDto } from './dto/user-response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @ApiBearerAuth()
 @ApiTags('users')
@@ -18,8 +20,9 @@ export class UserController {
   @Get(':id')
   @ApiFoundResponse({ description: 'User found' })
   @ApiNotFoundResponse({ description: 'User not found' })
-  findOne(@Param('id') id: number): Promise<User> {
-    return this.userService.findOneById(+id)
+  async findOne(@Param('id') id: number): Promise<UserResponseDto> {
+    const user = this.userService.findOneById(+id)
+    return plainToInstance(UserResponseDto, user)
   }
 
   /**
@@ -29,62 +32,32 @@ export class UserController {
   @ApiQuery({ name: 'username' })
   @ApiFoundResponse({ description: 'User found'})
   @ApiNotFoundResponse({ description: 'User not found' })
-  findOneByUsername(@Query('username') username: string): Promise<User> {
-    return this.userService.findOneByUsername(username)
+  async findOneByUsername(@Query('username') username: string): Promise<UserResponseDto> {
+    const user = this.userService.findOneByUsername(username)
+    return plainToInstance(UserResponseDto, user)
   }
 
   /**
    * Create a new user
    */
   @Post()
-  @UseInterceptors(FileInterceptor('file'))
-  @ApiCreatedResponse({ description: 'User created', type: User })
+  @ApiCreatedResponse({ description: 'User created', type: UserResponseDto })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  create(
-    @Body() createUserDto: CreateUserDto,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: 'jpeg',
-        })
-        .addMaxSizeValidator({
-          maxSize: 1000000
-        })
-        .build({
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        }),
-    )
-    file: Express.Multer.File
-  ): Promise<User> {
-    return this.userService.create(createUserDto, file)
+  async create(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
+    const user = this.userService.create(createUserDto);
+    return plainToInstance(UserResponseDto, user)
   }
 
   /**
    * Update a user by id
    */
   @Put(':id')
-  @UseInterceptors(FileInterceptor('file'))
   @ApiOkResponse({ description: 'User updated', type: User })
   @ApiNotFoundResponse({ description: 'User not found' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  update(
-    @Param('id') id: number,
-    @Body() updateUserDto: UpdateUserDto,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: 'jpeg',
-        })
-        .addMaxSizeValidator({
-          maxSize: 1000000
-        })
-        .build({
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        }),
-    )
-    file: Express.Multer.File
-  ): Promise<User> {
-    return this.userService.update(id, updateUserDto, file)
+  async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
+    const user = this.userService.update(id, updateUserDto)
+    return plainToInstance(UserResponseDto, user)
   }
 
   /**

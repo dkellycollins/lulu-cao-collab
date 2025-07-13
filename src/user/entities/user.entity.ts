@@ -15,9 +15,10 @@ export class User {
   @IsEmail()
   email: string;
 
-  @OneToOne(() => File, file => file.user)
-  profilePicture?: File;
+  @OneToOne(() => File, { cascade: true, eager: true, nullable: true })
+  @JoinColumn({ name: 'profile_picture_id' })
+  profilePicture?: File; // profilePicture now owns the relationship via foreign key (profile_picture_id)
 
   @OneToMany(() => Blog, blog => blog.author)
-  blogs?: Blog[]
+  blogs?: Blog[];
 }
