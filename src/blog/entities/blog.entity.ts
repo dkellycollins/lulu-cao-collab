@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne } from 'typeorm'
-import { User } from 'src/user/entities/user.entity';
-import { File } from 'src/file/entities/file.entity';
+import { User } from '../../user/entities/user.entity';
+import { File } from '../../file/entities/file.entity';
 
 @Entity()
 export class Blog {

@@ -2,16 +2,17 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BlogModule } from 'src/blog/blog.module';
-import { Blog } from 'src/blog/entities/blog.entity';
+import { BlogModule } from '../blog/blog.module';
+import { Blog } from '../blog/entities/blog.entity';
 // import { BookModule } from 'src/book/book.module';
 // import { Book } from 'src/book/entities/book.entity';
-import { User } from 'src/user/entities/user.entity';
-import { UserModule } from 'src/user/user.module';
+import { User } from '../user/entities/user.entity';
+import { UserModule } from '../user/user.module';
 // import { ReviewModule } from 'src/review/review.module';
 // import { Review } from 'src/review/entities/review.entity';
-import { File } from 'src/file/entities/file.entity';
-import { FileModule } from 'src/file/file.module';
+import { File } from '../file/entities/file.entity';
+import { FileModule } from '../file/file.module';
+import migrations from '../migrations';
 
 @Module({
   imports: [
@@ -19,6 +20,8 @@ import { FileModule } from 'src/file/file.module';
       type: 'sqlite',
       database: 'db',
       entities: [Blog, User, File],
+      migrations: migrations,
+      migrationsRun: true,
     }),
     UserModule,
     BlogModule,

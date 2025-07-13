@@ -1,5 +1,5 @@
-import { Blog } from 'src/blog/entities/blog.entity';
-import { File } from 'src/file/entities/file.entity';
+import { Blog } from '../../blog/entities/blog.entity';
+import { File } from '../../file/entities/file.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, OneToMany } from 'typeorm'
 import { IsEmail } from 'class-validator';
 
