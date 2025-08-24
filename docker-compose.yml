@@ -9,14 +9,17 @@ services:
       - AWS_SECRET_ACCESS_KEY=default
       - AWS_DEFAULT_REGION=us-west-2
       - EDGE_PORT=4566
-      - SERVICES=s3
+      - SERVICES=s3 # Only enable S3
       - DEBUG=1
       - DATA_DIR=/tmp/localstack/data
     volumes:
-      - "localstack:/tmp/localstack" # Mount the volume to the temp path inside the container
+      # Mounting a persistent volume so LocalStack will persist S3 buckets and objects across container restarts
+      - "localstack:/tmp/localstack" 
       # Mounting the Docker socket /var/run/docker.sock as a volume is required for some services 
       # that use Docker to provide the emulation, such as AWS Lambda
       - "/var/run/docker.sock:/var/run/docker.sock"
+      # Init scripts
+      - "./aws:/docker-entrypoint-initaws.d"   
       
 volumes:
   localstack: # Declare the named volume `localstack`
