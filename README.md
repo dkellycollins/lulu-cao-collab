@@ -21,7 +21,7 @@ To install project dependencies:
 $ npm install
 ```
 
-To develop methods related with S3, follow these steps on Mac:
+To develop the file feature with S3, follow these steps on Mac:
 ```bash
 brew install python
 brew install pipx
@@ -95,7 +95,10 @@ LocalStack:
   - `awslocal s3 mb s3://new-bucket-name`
   - `awslocal s3api list-buckets`
   - `awslocal s3 ls`
-  - `awslocal s3api list-objects --bucket profile-photo`
+  - `awslocal s3api list-objects --bucket blog-files`
+  - `awslocal s3 rm s3://profile-photo --recursive` <!-- Delete all objects in a bucket -->
+  - `awslocal s3api delete-bucket --bucket profile-photo`
 - [@aws-sdk/client-s3](https://www.npmjs.com/package/@aws-sdk/client-s3)
+- [@aws-sdk/s3-request-presigner](https://www.npmjs.com/package/@aws-sdk/s3-request-presigner)
 - [Tutorial 1 - Medium](https://iamads.medium.com/using-localstack-emulate-aws-s3-and-sqs-with-node-d43dda1d71c0)
 - [Tutorial 2 - DEV Community](https://dev.to/srishtikprasad/develop-and-test-aws-s3-applications-locally-with-nodejs-and-localstack-5efb)

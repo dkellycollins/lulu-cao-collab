@@ -57,7 +57,7 @@ export class UserService {
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     try {
-      const user = await this.userRepository.findOne({ where: { id }, relations: ['blogs', 'profilePictures'] });
+      const user = await this.userRepository.findOne({ where: { id }, relations: ['blogs', 'profilePicture'] });
 
       if (!user) {
         throw new NotFoundException({

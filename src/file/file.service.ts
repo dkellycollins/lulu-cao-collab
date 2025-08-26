@@ -1,15 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { Readable } from 'stream';
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { File } from './entities/file.entity';
 import { FileResponseDto } from './dto/file-response.dto';
 
 @Injectable()
 export class FileService {
   private s3: S3Client;
-  private bucket = process.env.S3_BUCKET || 'profile-photo';
+  private bucket = process.env.S3_BUCKET || 'blog-files';
 
   constructor(
     @InjectRepository(File)
@@ -33,29 +33,33 @@ export class FileService {
       throw new NotFoundException(`File with id ${id} not found`);
     }
 
-    const command = new GetObjectCommand({
-      Bucket: this.bucket,
-      Key: metadata.providerKey,
-    });
+    try {
+      const command = new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: metadata.providerKey,
+      });
 
-    const response = await this.s3.send(command);
-    const stream = response.Body as Readable;
+      // Generate a presigned URL valid for 1 hour (3600 seconds)
+      const signedUrl = await getSignedUrl(this.s3, command, { expiresIn: 3600 });
 
-    const data = await new Promise<string>((resolve, reject) => {
-      let fileData = '';
-      stream.on('data', (chunk) => (fileData += chunk));
-      stream.on('end', () => resolve(fileData));
-      stream.on('error', reject);
-    });
-
-    return {
-      id: metadata.id,
-      providerKey: metadata.providerKey,
-      filename: metadata.filename,
-      contentType: metadata.contentType,
-      contentSize: metadata.contentSize,
-      downloadUrl: data, 
-    };
+      return {
+        id: metadata.id,
+        providerKey: metadata.providerKey,
+        filename: metadata.filename,
+        contentType: metadata.contentType,
+        contentSize: metadata.contentSize,
+        downloadUrl: signedUrl,
+      };
+    } catch (err: any) {
+      if (err.name === 'NoSuchKey' || err.$metadata?.httpStatusCode === 404) {
+        throw new NotFoundException(
+          `File with id ${id} (key=${metadata.providerKey}) not found in S3`,
+        );
+      }
+      throw new InternalServerErrorException(
+        `Error retrieving file with id ${id}: ${err.message}`,
+      );
+    }
   }
 
 
