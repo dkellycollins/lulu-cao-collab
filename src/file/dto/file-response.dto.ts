@@ -4,4 +4,5 @@ export class FileResponseDto {
   filename: string;
   contentType: string;
   contentSize: number;
+  downloadUrl: string;
 }
