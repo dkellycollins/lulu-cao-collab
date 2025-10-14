@@ -1,9 +1,11 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { File } from './entities/file.entity';
+import { Blog } from '../blog/entities/blog.entity';
+import { User } from '../user/entities/user.entity';
 import { FileResponseDto } from './dto/file-response.dto';
 
 @Injectable()
@@ -14,6 +16,10 @@ export class FileService {
   constructor(
     @InjectRepository(File)
     private readonly fileRepository: Repository<File>,
+    @InjectRepository(Blog)
+    private readonly blogRepository: Repository<Blog>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {
     this.s3 = new S3Client({
       region: process.env.AWS_REGION || 'us-west-2',
@@ -114,6 +120,12 @@ export class FileService {
     const metadata = await this.fileRepository.findOneBy({ id });
     if (!metadata) {
       throw new NotFoundException(`File with ID ${id} not found`);
+    }
+
+    const isBlogCover = await this.blogRepository.exists({ where: {coverImage: {id}} });
+    const isProfileAvatar = await this.userRepository.exists({ where: {profilePicture: {id}} });
+    if (isBlogCover || isProfileAvatar) {
+      throw new BadRequestException('File is in use');
     }
 
     await this.s3.send(
