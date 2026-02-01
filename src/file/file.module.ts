@@ -5,8 +5,8 @@ import { FileService } from './file.service';
 import { MulterModule } from '@nestjs/platform-express';
 import * as multer from 'multer';
 import { File } from './entities/file.entity';
-import { Blog } from 'src/blog/entities/blog.entity';
-import { User } from 'src/user/entities/user.entity';
+import { Blog } from '../blog/entities/blog.entity';
+import { User } from '../user/entities/user.entity';
 
 @Module({
   imports: [    

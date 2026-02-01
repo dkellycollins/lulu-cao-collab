@@ -88,9 +88,10 @@ export class UserService {
   async delete(id: number): Promise<void> {
     const user = await this.findOneById(id);
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
+    await this.userRepository.delete(id);
+
     if (user.profilePicture) {
       await this.fileService.delete(user.profilePicture.id);
     }
-    await this.userRepository.delete(id);
   }
 }
