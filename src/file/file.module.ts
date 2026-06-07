@@ -1,23 +1,19 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { FileController } from "./file.controller";
-import { File } from './entities/file.entity';
 import { FileService } from './file.service';
 import { MulterModule } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import * as multer from 'multer';
+import { File } from './entities/file.entity';
+import { Blog } from '../blog/entities/blog.entity';
+import { User } from '../user/entities/user.entity';
 
 @Module({
   imports: [    
     MulterModule.register({
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, cb) => {
-          const filename = `${Date.now()}-${file.originalname}`;
-          cb(null, filename);
-        },
-      }),
+      storage: multer.memoryStorage(),
     }),
-    TypeOrmModule.forFeature([File])
+    TypeOrmModule.forFeature([File, Blog, User])
   ],
   providers: [FileService],
   controllers: [FileController],

@@ -57,7 +57,7 @@ export class UserService {
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     try {
-      const user = await this.userRepository.findOne({ where: { id }, relations: ['blogs', 'profilePictures'] });
+      const user = await this.userRepository.findOne({ where: { id }, relations: ['blogs', 'profilePicture'] });
 
       if (!user) {
         throw new NotFoundException({
@@ -88,9 +88,10 @@ export class UserService {
   async delete(id: number): Promise<void> {
     const user = await this.findOneById(id);
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
+    await this.userRepository.delete(id);
+
     if (user.profilePicture) {
       await this.fileService.delete(user.profilePicture.id);
     }
-    await this.userRepository.delete(id);
   }
 }

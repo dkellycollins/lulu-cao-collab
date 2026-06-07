@@ -63,9 +63,10 @@ export class BlogService {
     if (!blog) {
       throw new NotFoundException(`Blog with ID ${id} not found`);
     }
+    await this.blogRepository.delete(id);
+
     if (blog.coverImage) {
       await this.fileService.delete(blog.coverImage.id);
     }
-    await this.blogRepository.delete(id);
   }
 }
