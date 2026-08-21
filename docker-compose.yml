@@ -1,25 +1,36 @@
 services:
-  localstack:
-    image: localstack/localstack:0.14.5
-    ports:
-      - "4566-4583:4566-4583"
+  # localstack:
+  #   image: localstack/localstack:0.14.5
+  #   ports:
+  #     - "4566-4583:4566-4583"
+  #   environment:
+  #     - AWS_REGION=us-west-2
+  #     - AWS_ACCESS_KEY_ID=default
+  #     - AWS_SECRET_ACCESS_KEY=default
+  #     - AWS_DEFAULT_REGION=us-west-2
+  #     - EDGE_PORT=4566
+  #     - SERVICES=s3 # Only enable S3
+  #     - DEBUG=1
+  #     - DATA_DIR=/tmp/localstack/data
+  #   volumes:
+  #     # Mounting a persistent volume so LocalStack will persist S3 buckets and objects across container restarts
+  #     - "localstack:/tmp/localstack" 
+  #     # Mounting the Docker socket /var/run/docker.sock as a volume is required for some services 
+  #     # that use Docker to provide the emulation, such as AWS Lambda
+  #     - "/var/run/docker.sock:/var/run/docker.sock"
+  #     # Init scripts
+  #     - "./aws:/docker-entrypoint-initaws.d"   
+
+  postgres:
+    image: postgres:16
     environment:
-      - AWS_REGION=us-west-2
-      - AWS_ACCESS_KEY_ID=default
-      - AWS_SECRET_ACCESS_KEY=default
-      - AWS_DEFAULT_REGION=us-west-2
-      - EDGE_PORT=4566
-      - SERVICES=s3 # Only enable S3
-      - DEBUG=1
-      - DATA_DIR=/tmp/localstack/data
+      POSTGRES_USER: vibereads
+      POSTGRES_PASSWORD: vibereads
+      POSTGRES_DB: vibereads
+    ports: # expose the ports so that db commands can be run from local machine, in addition to docker
+      - "5432:5432"
     volumes:
-      # Mounting a persistent volume so LocalStack will persist S3 buckets and objects across container restarts
-      - "localstack:/tmp/localstack" 
-      # Mounting the Docker socket /var/run/docker.sock as a volume is required for some services 
-      # that use Docker to provide the emulation, such as AWS Lambda
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      # Init scripts
-      - "./aws:/docker-entrypoint-initaws.d"   
+      - postgres_data:/var/lib/postgresql/data
 
   # Notice there are no ports exposed on the API servers. Only Nginx is reachable.
   api-a:
@@ -28,6 +39,15 @@ services:
       dockerfile: Dockerfile
     environment:
       SERVER_NAME: NestJS Server A
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: vibereads
+      DB_PASSWORD: vibereads
+      DB_DATABASE: vibereads
+      REDIS_URL: redis://redis-primary:6379
+    depends_on:
+      - postgres
+      - redis-primary
 
   api-b:
     build:
@@ -35,6 +55,15 @@ services:
       dockerfile: Dockerfile
     environment:
       SERVER_NAME: NestJS Server B
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: vibereads
+      DB_PASSWORD: vibereads
+      DB_DATABASE: vibereads
+      REDIS_URL: redis://redis-primary:6379
+    depends_on:
+      - postgres
+      - redis-primary
 
   nginx:
     image: nginx:latest
@@ -46,5 +75,15 @@ services:
       - api-a
       - api-b
 
+  redis-primary:
+    image: redis:7
+
+  redis-replica:
+    image: redis:7
+    command: redis-server --replicaof redis-primary 6379
+    depends_on:
+      - redis-primary
+
 volumes:
-  localstack: # Declare the named volume `localstack`
+  postgres_data: # Use named volume to ensure data survives container restarts
+  # localstack: 
