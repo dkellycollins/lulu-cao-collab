@@ -13,6 +13,7 @@ import { UserModule } from '../user/user.module';
 import { File } from '../file/entities/file.entity';
 import { FileModule } from '../file/file.module';
 import migrations from '../migrations';
+import { RedisModule } from 'src/redis/redis.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import migrations from '../migrations';
     }),
     UserModule,
     BlogModule,
-    FileModule,              
+    FileModule,
+    RedisModule              
   ],
   controllers: [AppController],
   providers: [AppService],
