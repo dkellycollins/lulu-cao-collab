@@ -19,11 +19,27 @@ import { RedisModule } from '../redis/redis.module';
   imports: [
     TypeOrmModule.forRoot({ // Integrate with database
       type: 'postgres',
-      host: process.env.DB_HOST ?? 'localhost',
-      port: parseInt(process.env.DB_PORT ?? '5432', 10),
-      username: process.env.DB_USERNAME ?? 'vibereads',
-      password: process.env.DB_PASSWORD ?? 'vibereads',
-      database: process.env.DB_DATABASE ?? 'vibereads',
+      // Native master/slave routing: TypeORM sends every SELECT to a slave
+      // and everything else (INSERT/UPDATE/DELETE/migrations) to the master,
+      // so repositories and query builders don't need to know which host they're on.
+      replication: {
+        master: {
+          host: process.env.DB_HOST ?? 'localhost',
+          port: parseInt(process.env.DB_PORT ?? '5432', 10),
+          username: process.env.DB_USERNAME ?? 'vibereads',
+          password: process.env.DB_PASSWORD ?? 'vibereads',
+          database: process.env.DB_DATABASE ?? 'vibereads',
+        },
+        slaves: [
+          {
+            host: process.env.DB_REPLICA_HOST ?? process.env.DB_HOST ?? 'localhost',
+            port: parseInt(process.env.DB_REPLICA_PORT ?? process.env.DB_PORT ?? '5432', 10),
+            username: process.env.DB_USERNAME ?? 'vibereads',
+            password: process.env.DB_PASSWORD ?? 'vibereads',
+            database: process.env.DB_DATABASE ?? 'vibereads',
+          },
+        ],
+      },
       entities: [Blog, User, File],
       migrations: migrations,
       migrationsRun: true,

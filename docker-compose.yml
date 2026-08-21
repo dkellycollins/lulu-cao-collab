@@ -1,36 +1,97 @@
 services:
-  # localstack:
-  #   image: localstack/localstack:0.14.5
-  #   ports:
-  #     - "4566-4583:4566-4583"
-  #   environment:
-  #     - AWS_REGION=us-west-2
-  #     - AWS_ACCESS_KEY_ID=default
-  #     - AWS_SECRET_ACCESS_KEY=default
-  #     - AWS_DEFAULT_REGION=us-west-2
-  #     - EDGE_PORT=4566
-  #     - SERVICES=s3 # Only enable S3
-  #     - DEBUG=1
-  #     - DATA_DIR=/tmp/localstack/data
-  #   volumes:
-  #     # Mounting a persistent volume so LocalStack will persist S3 buckets and objects across container restarts
-  #     - "localstack:/tmp/localstack" 
-  #     # Mounting the Docker socket /var/run/docker.sock as a volume is required for some services 
-  #     # that use Docker to provide the emulation, such as AWS Lambda
-  #     - "/var/run/docker.sock:/var/run/docker.sock"
-  #     # Init scripts
-  #     - "./aws:/docker-entrypoint-initaws.d"   
+  localstack:
+    image: localstack/localstack:0.14.5
+    ports:
+      - "4566-4583:4566-4583"
+    environment:
+      - AWS_REGION=us-west-2
+      - AWS_ACCESS_KEY_ID=default
+      - AWS_SECRET_ACCESS_KEY=default
+      - AWS_DEFAULT_REGION=us-west-2
+      - EDGE_PORT=4566
+      - SERVICES=s3 # Only enable S3
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+    volumes:
+      # Mounting a persistent volume so LocalStack will persist S3 buckets and objects across container restarts
+      - "localstack:/tmp/localstack"
+      # Mounting the Docker socket /var/run/docker.sock as a volume is required for some services
+      # that use Docker to provide the emulation, such as AWS Lambda
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      # Init scripts
+      - "./aws:/docker-entrypoint-initaws.d"
 
-  postgres:
+  # Source of truth. All writes (and migrations) go here.
+  postgres-primary:
     image: postgres:16
     environment:
       POSTGRES_USER: vibereads
       POSTGRES_PASSWORD: vibereads
       POSTGRES_DB: vibereads
+      REPLICATION_USER: replicator
+      REPLICATION_PASSWORD: replicator_pw
     ports: # expose the ports so that db commands can be run from local machine, in addition to docker
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_primary_data:/var/lib/postgresql/data
+      - ./scripts/postgres-primary/init-replication.sh:/docker-entrypoint-initdb.d/init-replication.sh:ro
+    command: >
+      postgres
+      -c wal_level=replica
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+      -c hot_standby=on
+    healthcheck: # Make sure db accepts connection before attempting it
+      test: ["CMD-SHELL", "pg_isready -U vibereads -d vibereads"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Read-only streaming standby. App reads fall back here on a cache miss.
+  postgres-replica:
+    image: postgres:16
+    depends_on:
+      postgres-primary:
+        condition: service_healthy 
+    environment:
+      PGUSER: replicator
+      PGPASSWORD: replicator_pw
+      PRIMARY_HOST: postgres-primary
+      PRIMARY_PORT: 5432
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_replica_data:/var/lib/postgresql/data
+      - ./scripts/postgres-replica/replica-entrypoint.sh:/replica-entrypoint.sh:ro
+    entrypoint: ["/bin/bash", "/replica-entrypoint.sh"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U replicator -d vibereads"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Accepts all cache writes. Redis replicas are read-only, so this is the only
+  # instance the app ever calls .set()/.del() against.
+  redis-primary:
+    image: redis:7
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Read-only. App cache reads hit this first, before falling back to Postgres.
+  redis-replica:
+    image: redis:7
+    command: redis-server --replicaof redis-primary 6379
+    depends_on:
+      redis-primary:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   # Notice there are no ports exposed on the API servers. Only Nginx is reachable.
   api-a:
@@ -39,15 +100,24 @@ services:
       dockerfile: Dockerfile
     environment:
       SERVER_NAME: NestJS Server A
-      DB_HOST: postgres
+      DB_HOST: postgres-primary
       DB_PORT: 5432
+      DB_REPLICA_HOST: postgres-replica
+      DB_REPLICA_PORT: 5432
       DB_USERNAME: vibereads
       DB_PASSWORD: vibereads
       DB_DATABASE: vibereads
-      REDIS_URL: redis://redis-primary:6379
+      REDIS_PRIMARY_URL: redis://redis-primary:6379
+      REDIS_REPLICA_URL: redis://redis-replica:6379
     depends_on:
-      - postgres
-      - redis-primary
+      postgres-primary:
+        condition: service_healthy
+      postgres-replica:
+        condition: service_healthy
+      redis-primary:
+        condition: service_healthy
+      redis-replica:
+        condition: service_healthy
 
   api-b:
     build:
@@ -55,15 +125,24 @@ services:
       dockerfile: Dockerfile
     environment:
       SERVER_NAME: NestJS Server B
-      DB_HOST: postgres
+      DB_HOST: postgres-primary
       DB_PORT: 5432
+      DB_REPLICA_HOST: postgres-replica
+      DB_REPLICA_PORT: 5432
       DB_USERNAME: vibereads
       DB_PASSWORD: vibereads
       DB_DATABASE: vibereads
-      REDIS_URL: redis://redis-primary:6379
+      REDIS_PRIMARY_URL: redis://redis-primary:6379
+      REDIS_REPLICA_URL: redis://redis-replica:6379
     depends_on:
-      - postgres
-      - redis-primary
+      postgres-primary:
+        condition: service_healthy
+      postgres-replica:
+        condition: service_healthy
+      redis-primary:
+        condition: service_healthy
+      redis-replica:
+        condition: service_healthy
 
   nginx:
     image: nginx:latest
@@ -75,15 +154,8 @@ services:
       - api-a
       - api-b
 
-  redis-primary:
-    image: redis:7
-
-  redis-replica:
-    image: redis:7
-    command: redis-server --replicaof redis-primary 6379
-    depends_on:
-      - redis-primary
-
-volumes:
-  postgres_data: # Use named volume to ensure data survives container restarts
-  # localstack: 
+# Use named volume to ensure data survives container restarts
+volumes: 
+  localstack: 
+  postgres_primary_data: 
+  postgres_replica_data:

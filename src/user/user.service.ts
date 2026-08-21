@@ -5,27 +5,40 @@ import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { FileService } from '../file/file.service';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class UserService {
-  private readonly logger = new Logger(UserService.name); 
+  private readonly logger = new Logger(UserService.name);
   constructor(
     private readonly fileService: FileService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly redisService: RedisService,
   ) {}
 
   async findOneById(id: number): Promise<User> {
-    const user = this.userRepository.findOneBy({ id });
+    // Check the cache first (redis-replica).
+    const cached = await this.redisService.read.get(`user:${id}`);
+    if (cached && typeof cached == 'string') {
+      return JSON.parse(cached);
+    }
+
+    // Cache miss: fall back to Postgres. TypeORM routes this SELECT to postgres-replica.
+    const user = await this.userRepository.findOneBy({ id });
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
+    // Populate the cache via redis-primary (the only writable Redis instance).
+    await this.redisService.write.set(`user:${id}`, JSON.stringify(user));
+
     return user;
   }
 
   async findOneByUsername(username: string): Promise<User> {
-    const user = this.userRepository.findOneBy({ username });
+    // TypeORM routes this SELECT to postgres-replica.
+    const user = await this.userRepository.findOneBy({ username });
 
     if (!user) {
       throw new NotFoundException(`User with username ${username} not found`);
@@ -37,15 +50,23 @@ export class UserService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     try {
       const { username, email, profilePictureId } = createUserDto;
-      const user = this.userRepository.create({username: username, email: email});
-      await this.userRepository.save(user);
+      const user = this.userRepository.create({ username, email });
 
       if (profilePictureId) {
         user.profilePicture = await this.fileService.findOne(profilePictureId);
       }
 
-      return await this.userRepository.save(user);
-    } catch (error) {
+      // Single write to postgres-primary, with the profile picture already attached.
+      const savedUser = await this.userRepository.save(user);
+
+      // Populate the cache via redis-primary.
+      await this.redisService.write.set(
+        `user:${savedUser.id}`,
+        JSON.stringify(savedUser),
+      );
+
+      return savedUser;
+    } catch (error: any) {
       this.logger.error(`Error creating the new user`, error.stack);
       throw new InternalServerErrorException({
         statusCode: 400,
@@ -69,13 +90,22 @@ export class UserService {
       const { username, email, profilePictureId } = updateUserDto;
       if (username) user.username = username;
       if (email) user.email = email;
-      
+
       if (profilePictureId) {
         user.profilePicture = await this.fileService.findOne(profilePictureId);
       }
 
-      return await this.userRepository.save(user);
-    } catch (error) {
+      // Persist to postgres-primary.
+      const savedUser = await this.userRepository.save(user);
+
+      // Refresh the cache via redis-primary.
+      await this.redisService.write.set(
+        `user:${id}`,
+        JSON.stringify(savedUser),
+      );
+
+      return savedUser;
+    } catch (error: any) {
       this.logger.error(`Error updating user with ID: ${id}`, error.stack);
       throw new InternalServerErrorException({
         statusCode: 400,
@@ -89,6 +119,7 @@ export class UserService {
     const user = await this.findOneById(id);
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
     await this.userRepository.delete(id);
+    await this.redisService.write.del(`user:${id}`);
 
     if (user.profilePicture) {
       await this.fileService.delete(user.profilePicture.id);
