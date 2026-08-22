@@ -6,6 +6,12 @@ import { name, description, version } from '../package.json';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Stamps every response with the instance that served it
+  app.use((req, res, next) => {
+    res.setHeader('X-Server-Name', process.env.SERVER_NAME ?? 'unknown');
+    next();
+  });
+
   const config = new DocumentBuilder()
     .setTitle(name)
     .setDescription(description)
@@ -17,7 +23,11 @@ async function bootstrap() {
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
 
-  await app.listen(process.env.PORT ?? 3001);
-  console.log(`Application is running on: ${await app.getUrl()}`);
+  await app.listen(process.env.PORT ?? 3000);
+
+  const serverName = process.env.SERVER_NAME ?? 'unknown';
+  console.log(
+    `${serverName} listening on ${await app.getUrl()}`,
+  );
 }
 bootstrap();

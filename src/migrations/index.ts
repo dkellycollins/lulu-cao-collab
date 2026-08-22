@@ -1,5 +1,5 @@
-import { Init1748620719658 } from "./1748620719658-Init";
+import { InitPostgres1787342056778 } from "./1787342056778-InitPostgres";
 
 export default [
-  Init1748620719658
+  InitPostgres1787342056778
 ];

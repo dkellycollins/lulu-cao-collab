@@ -4,28 +4,50 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BlogModule } from '../blog/blog.module';
 import { Blog } from '../blog/entities/blog.entity';
-// import { BookModule } from 'src/book/book.module';
-// import { Book } from 'src/book/entities/book.entity';
+// import { BookModule } from '../book/book.module';
+// import { Book } from '../book/entities/book.entity';
 import { User } from '../user/entities/user.entity';
 import { UserModule } from '../user/user.module';
-// import { ReviewModule } from 'src/review/review.module';
-// import { Review } from 'src/review/entities/review.entity';
+// import { ReviewModule } from '../review/review.module';
+// import { Review } from '../review/entities/review.entity';
 import { File } from '../file/entities/file.entity';
 import { FileModule } from '../file/file.module';
 import migrations from '../migrations';
+import { RedisModule } from '../redis/redis.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({ // Integrate with database
-      type: 'sqlite',
-      database: 'db',
+      type: 'postgres',
+      // Native master/slave routing: TypeORM sends every SELECT to a slave
+      // and everything else (INSERT/UPDATE/DELETE/migrations) to the master,
+      // so repositories and query builders don't need to know which host they're on.
+      replication: {
+        master: {
+          host: process.env.DB_HOST ?? 'localhost',
+          port: parseInt(process.env.DB_PORT ?? '5432', 10),
+          username: process.env.DB_USERNAME ?? 'vibereads',
+          password: process.env.DB_PASSWORD ?? 'vibereads',
+          database: process.env.DB_DATABASE ?? 'vibereads',
+        },
+        slaves: [
+          {
+            host: process.env.DB_REPLICA_HOST ?? process.env.DB_HOST ?? 'localhost',
+            port: parseInt(process.env.DB_REPLICA_PORT ?? process.env.DB_PORT ?? '5432', 10),
+            username: process.env.DB_USERNAME ?? 'vibereads',
+            password: process.env.DB_PASSWORD ?? 'vibereads',
+            database: process.env.DB_DATABASE ?? 'vibereads',
+          },
+        ],
+      },
       entities: [Blog, User, File],
       migrations: migrations,
       migrationsRun: true,
     }),
     UserModule,
     BlogModule,
-    FileModule,              
+    FileModule,
+    RedisModule              
   ],
   controllers: [AppController],
   providers: [AppService],

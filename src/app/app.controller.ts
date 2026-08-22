@@ -11,9 +11,28 @@ export class AppController {
    * @returns 
    */
   @Get()
-  @ApiOkResponse({ description: "VibeReads - A list of featured blogs coming soon..." })
+  @ApiOkResponse()
   hello(): string {
     return this.appService.hello();
+  }
+
+  @Get('health')
+  @ApiOkResponse()
+  health(): object {
+    return {
+      status: 'ok',
+      server: process.env.SERVER_NAME
+    }
+  }
+
+  // Call this endpoint to test nginx traffic distribution
+  @Get('nginx')
+  @ApiOkResponse()
+  nginx(): object {
+    return {
+      server: process.env.SERVER_NAME,
+      timestamp: new Date().toISOString(),
+    }
   }
 
   // @Post()
