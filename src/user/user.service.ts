@@ -20,6 +20,8 @@ export class UserService {
     // Check the cache first (redis-replica).
     const cached = await this.redisService.read.get(`user:${id}`);
     if (cached && typeof cached == 'string') {
+      console.log(`Existing cache found from redis-replica:`)
+      console.log(JSON.parse(cached))
       return JSON.parse(cached);
     }
 
@@ -32,6 +34,11 @@ export class UserService {
 
     // Populate the cache via redis-primary (the only writable Redis instance).
     await this.redisService.write.set(`user:${id}`, JSON.stringify(user));
+    const newCache = await this.redisService.read.get(`user:${id}`);
+    if (newCache && typeof newCache == 'string') {
+      console.log(`Successfully cached writes to redis-primary:`)
+      console.log(JSON.parse(newCache))
+    }
 
     return user;
   }
