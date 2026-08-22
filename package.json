@@ -17,6 +17,7 @@
     "migration:up": "typeorm-ts-node-commonjs migration:run -d ./src/data-source.ts",
     "migration:down": "typeorm-ts-node-commonjs migration:revert -d ./src/data-source.ts",
     "migration:show": "typeorm-ts-node-commonjs migration:show -d ./src/data-source.ts",
+    "seed": "ts-node -r tsconfig-paths/register src/seed.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",

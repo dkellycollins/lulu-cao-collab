@@ -6,6 +6,12 @@ import { name, description, version } from '../package.json';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Stamps every response with the instance that served it
+  app.use((req, res, next) => {
+    res.setHeader('X-Server-Name', process.env.SERVER_NAME ?? 'unknown');
+    next();
+  });
+
   const config = new DocumentBuilder()
     .setTitle(name)
     .setDescription(description)
